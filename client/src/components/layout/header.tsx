@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Scale, MessageCircle, ExternalLink, Menu } from "lucide-react";
+import { Scale, MessageCircle, ExternalLink, Menu, FileScan } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -8,6 +8,7 @@ export default function Header() {
 
   const navItems = [
     { path: "/", label: "Chat Assistant", icon: MessageCircle },
+    { path: "/tenancy-agreement-analysis", label: "Tenancy Analysis", icon: FileScan },
     { path: "/portals", label: "Gov Portals", icon: ExternalLink }
   ];
 
@@ -24,8 +25,7 @@ export default function Header() {
                   ? "text-primary border-b-2 border-primary font-medium rounded-none" 
                   : "text-muted-foreground hover:text-foreground"
               } transition-colors px-4 py-2`}
-              data-testid={`nav-${item.path === "/" ? "chat" : "portals"}`}
-            >
+              data-testid={`nav-${item.path.replace("/", "")}`}>
               <item.icon className="mr-2 h-4 w-4" />
               {item.label}
             </Button>

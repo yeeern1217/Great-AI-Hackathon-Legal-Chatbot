@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertChatMessageSchema, insertChatSessionSchema } from "@shared/schema";
-import { generateLegalAdvice, analyzeDocument } from "./services/gemini";
+import { generateLegalAdvice, analyzeDocument, analyzeTenancyAgreement, analyzeTenancyAgreementFile } from "./services/gemini";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -18,21 +18,6 @@ const upload = multer({
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = [
-      'application/pdf',
-      'image/jpeg',
-      'image/png',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    ];
-    
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type. Only PDF, images, and Word documents are allowed.'));
-    }
-  }
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -79,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userMessage = await storage.addChatMessage(validatedData);
       
       // Generate AI response using Gemini
-      const aiResponse = await generateLegalAdvice(validatedData.content, validatedData.documentContext);
+      const aiResponse = await generateLegalAdvice(validatedData.content, validatedData.documentContext || undefined);
       
       // Store AI response
       const assistantMessage = await storage.addChatMessage({
@@ -121,6 +106,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         file: uploadedFile,
         analysis
       });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Tenancy agreement analysis endpoint (text)
+  app.post("/api/analyze-tenancy-agreement", async (req, res) => {
+    try {
+      const { documentText } = req.body;
+      if (!documentText) {
+        return res.status(400).json({ message: "No document text provided" });
+      }
+
+      const analysisResult = await analyzeTenancyAgreement(documentText);
+      res.json(analysisResult);
+
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Tenancy agreement analysis endpoint (file)
+  app.post("/api/analyze-tenancy-agreement-file", upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const analysisResult = await analyzeTenancyAgreementFile(req.file.path, req.file.mimetype);
+      res.json(analysisResult);
+
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }
