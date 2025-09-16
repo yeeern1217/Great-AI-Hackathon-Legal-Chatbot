@@ -25,6 +25,6 @@ AI Legal Mitra is an AI-powered assistant designed to simplify legal processes b
 
 1. Clone the repo:
    ```bash
-   git clone https://github.com/Sanjay-2788/AIlegalMintra.git](https://github.com/yeeern1217/Great-AI-Hackathon-Legal-Chatbot.git
+   git clone https://github.com/yeeern1217/Great-AI-Hackathon-Legal-Chatbot.git
 2. Run the demo:
    npm run dev
