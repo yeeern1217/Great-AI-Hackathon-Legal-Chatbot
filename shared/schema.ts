@@ -49,7 +49,7 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   id: true,
   createdAt: true,
 }).extend({
-  documentContext: z.string().optional(),
+  documentContext: z.string().nullable().optional(),
 });
 
 export const insertFileSchema = createInsertSchema(uploadedFiles).omit({
