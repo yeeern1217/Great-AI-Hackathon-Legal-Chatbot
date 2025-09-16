@@ -54,18 +54,21 @@ export default function FileUpload({ onFileUpload, onAnalysisComplete, sessionId
       const allowedTypes = [
         'application/pdf',
         'image/jpeg',
-        'image/png', 
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        'image/png',
+        'text/plain',
+        'text/markdown',
       ];
 
       if (!allowedTypes.includes(file.type)) {
-        toast({
-          title: "Invalid file type",
-          description: "Please upload PDF, images, or Word documents only.",
-          variant: "destructive",
-        });
-        return;
+        const fileExtension = file.name.split('.').pop()?.toLowerCase();
+        if (!fileExtension || !['txt', 'md'].includes(fileExtension)) {
+          toast({
+            title: "Invalid file type",
+            description: "Please upload PDF, images, or text documents only.",
+            variant: "destructive",
+          });
+          return;
+        }
       }
 
       if (file.size > 10 * 1024 * 1024) {
@@ -93,7 +96,7 @@ export default function FileUpload({ onFileUpload, onAnalysisComplete, sessionId
         ref={fileInputRef}
         type="file"
         className="hidden"
-        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+        accept=".pdf,.jpg,.jpeg,.png,.txt,.md"
         onChange={handleFileSelect}
         data-testid="file-input"
       />

@@ -1,6 +1,8 @@
 import * as fs from "fs";
+import path from "path";
 import dotenv from "dotenv";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import pdf from "pdf-parse";
 
 // Load environment variables
 dotenv.config();
@@ -77,9 +79,27 @@ Format your response clearly with bullet points where appropriate and always end
 // ========================== 
 export async function analyzeDocument(filePath: string, mimeType: string): Promise<string> {
   try {
+    let documentText: string | null = null;
+    const fileExtension = path.extname(filePath).toLowerCase();
+
+    // 1. Extract text from PDF or text files
     if (mimeType === "application/pdf") {
-      return "I can see you've uploaded a PDF. I can't directly read PDF content here, but I can help with general legal questions about its type. Please describe your document or ask specific legal questions.";
-    } else if (mimeType.startsWith("image/")) {
+      const dataBuffer = fs.readFileSync(filePath);
+      const data = await pdf(dataBuffer);
+      documentText = data.text;
+    } else if (mimeType.startsWith("text/") || fileExtension === '.txt' || fileExtension === '.md') {
+      documentText = fs.readFileSync(filePath, "utf-8");
+    }
+
+    // 2. If text was extracted, summarize it
+    if (documentText) {
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const prompt = `Summarize the following document text concisely. This summary will be used as context for a legal chat assistant. Focus on extracting the key points, parties involved, and main obligations or clauses.`;
+      const response = await model.generateContent([prompt, documentText]);
+      return response.response.text() + "\n\nDisclaimer: This analysis provides a summary for informational purposes only. For specific advice, consult a qualified advocate.";
+    }
+    // 3. If it's an image, process it
+    else if (mimeType.startsWith("image/")) {
       const imageBytes = fs.readFileSync(filePath);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
@@ -90,18 +110,21 @@ export async function analyzeDocument(filePath: string, mimeType: string): Promi
             mimeType: mimeType,
           },
         },
-        "Analyze this legal document image and provide Indian law-related explanations. Always add a disclaimer."
+        "Analyze this legal document image and provide a concise summary of its content. This summary will be used as context for a legal chat assistant. Focus on key points, parties involved, and main obligations or clauses. Always add a disclaimer."
       ]);
 
       return response.response.text() + "\n\nDisclaimer: This analysis provides general legal information only. For specific advice, consult a qualified advocate.";
-    } else {
-      return "I can assist with PDF and image files. Please upload a supported format.";
+    }
+    // 4. Otherwise, it's an unsupported format
+    else {
+      return "I can assist with PDF, text, and image files. Please upload a supported format.";
     }
   } catch (error) {
     console.error("Document analysis error:", error);
     return "I couldn't analyze this document. Please try again or consult a legal professional.";
   }
 }
+
 
 // ========================== 
 // Voice Input
