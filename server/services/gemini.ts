@@ -13,11 +13,11 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// ==========================
+// ========================== 
 // Chat / Legal Advice
-// ==========================
-export async function generateLegalAdvice(userQuestion: string): Promise<string> {
-  const systemPrompt = `You are an AI-powered legal advisor specializing in providing information about basic laws in India. 
+// ========================== 
+export async function generateLegalAdvice(userQuestion: string, documentContext?: string): Promise<string> {
+  let systemPrompt = `You are an AI-powered legal advisor specializing in providing information about basic laws in India. 
 Your role is to help users understand legal concepts in simple and clear language.
 
 Guidelines:
@@ -38,28 +38,50 @@ Guidelines:
 
 Format your response clearly with bullet points where appropriate and always end with the disclaimer.`;
 
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  
+  if (documentContext) {
+    const contextualPrompt = [
+      `You are an AI-powered legal advisor. A user has uploaded a document and is asking questions about it. Here is the summary of the document analysis:`, 
+      "--- DOCUMENT CONTEXT ---",
+      documentContext,
+      "--- END DOCUMENT CONTEXT ---",
+      "Based on the document context provided above, please answer the user's question. Adhere to all other guidelines and disclaimers.",
+      "User's Question: " + userQuestion
+    ].join('\n');
+    
+    try {
+      const response = await model.generateContent(contextualPrompt);
+      return response.response.text() || 
+        "I apologize, but I couldn't generate a response based on the document. Please try again or consult a legal professional.";
+    } catch (error) {
+      console.error("Gemini API error with context:", error);
+      return "I'm experiencing technical difficulties with the document analysis. Please try again later.";
+    }
 
-    const response = await model.generateContent([systemPrompt, userQuestion]);
-    return response.response.text() || 
-      "I apologize, but I couldn't generate a response. Please try again or consult a legal professional.";
-  } catch (error) {
-    console.error("Gemini API error:", error);
-    return "I'm experiencing technical difficulties. Please try again later or consult a qualified advocate for immediate legal assistance.";
+  } else {
+    // Original behavior without document context
+    try {
+      const response = await model.generateContent([systemPrompt, userQuestion]);
+      return response.response.text() || 
+        "I apologize, but I couldn't generate a response. Please try again or consult a legal professional.";
+    } catch (error) {
+      console.error("Gemini API error:", error);
+      return "I'm experiencing technical difficulties. Please try again later or consult a qualified advocate for immediate legal assistance.";
+    }
   }
 }
 
-// ==========================
+// ========================== 
 // Document Analysis
-// ==========================
+// ========================== 
 export async function analyzeDocument(filePath: string, mimeType: string): Promise<string> {
   try {
     if (mimeType === "application/pdf") {
       return "I can see you've uploaded a PDF. I can't directly read PDF content here, but I can help with general legal questions about its type. Please describe your document or ask specific legal questions.";
     } else if (mimeType.startsWith("image/")) {
       const imageBytes = fs.readFileSync(filePath);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const response = await model.generateContent([
         {
@@ -81,9 +103,9 @@ export async function analyzeDocument(filePath: string, mimeType: string): Promi
   }
 }
 
-// ==========================
+// ========================== 
 // Voice Input
-// ==========================
+// ========================== 
 export async function processVoiceInput(audioText: string, language: string): Promise<string> {
   const prompt = `The user has spoken in ${language}. Their message is: "${audioText}". 
 Respond about Indian laws in a clear, helpful manner. 

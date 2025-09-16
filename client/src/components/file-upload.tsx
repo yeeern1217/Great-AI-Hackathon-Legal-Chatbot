@@ -6,10 +6,11 @@ import { Paperclip } from "lucide-react";
 
 interface FileUploadProps {
   onFileUpload: (file: File) => void;
+  onAnalysisComplete: (analysis: string) => void;
   sessionId: string;
 }
 
-export default function FileUpload({ onFileUpload, sessionId }: FileUploadProps) {
+export default function FileUpload({ onFileUpload, onAnalysisComplete, sessionId }: FileUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploadMutation = useMutation({
@@ -33,9 +34,9 @@ export default function FileUpload({ onFileUpload, sessionId }: FileUploadProps)
         title: "File uploaded successfully",
         description: "Your document has been analyzed.",
       });
-      
-      // Here you could add the analysis result to the chat
-      // This would require additional API integration
+      if (data.analysis) {
+        onAnalysisComplete(data.analysis);
+      }
     },
     onError: (error: any) => {
       toast({

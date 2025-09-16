@@ -79,7 +79,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userMessage = await storage.addChatMessage(validatedData);
       
       // Generate AI response using Gemini
-      const aiResponse = await generateLegalAdvice(validatedData.content);
+      const aiResponse = await generateLegalAdvice(validatedData.content, validatedData.documentContext);
       
       // Store AI response
       const assistantMessage = await storage.addChatMessage({

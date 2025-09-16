@@ -20,6 +20,7 @@ interface ChatInterfaceProps {
 export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
   const [message, setMessage] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const [documentContext, setDocumentContext] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch chat messages
@@ -35,6 +36,7 @@ export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
         sessionId,
         role: "user",
         content,
+        documentContext,
       });
       return response.json();
     },
@@ -85,6 +87,16 @@ export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
     toast({
       title: "File Uploaded",
       description: `Analyzing ${file.name}...`,
+    });
+  };
+
+  const handleAnalysisComplete = (analysis: string) => {
+    setDocumentContext(analysis);
+    // Optionally, add the analysis to the chat display right away
+    queryClient.setQueryData(["/api/chat/session", sessionId, "messages"], (oldData: any) => {
+      const newMessages = oldData ? [...oldData] : [];
+      newMessages.push({ id: Date.now().toString(), role: 'assistant', content: `Document Analysis:\n${analysis}`, createdAt: new Date().toISOString() });
+      return newMessages;
     });
   };
 
@@ -148,9 +160,7 @@ export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
             messages.map((msg: ChatMessage) => (
               <div
                 key={msg.id}
-                className={`flex items-start space-x-3 animate-fade-in ${
-                  msg.role === "user" ? "justify-end" : ""
-                }`}
+                className={`flex items-start space-x-3 animate-fade-in ${msg.role === "user" ? "justify-end" : ""}`}
               >
                 {msg.role === "assistant" && (
                   <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
@@ -158,11 +168,7 @@ export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
                   </div>
                 )}
                 <div
-                  className={`rounded-2xl p-4 max-w-md ${
-                    msg.role === "user"
-                      ? "bg-primary text-primary-foreground rounded-tr-sm"
-                      : "bg-muted/50 text-foreground rounded-tl-sm"
-                  }`}
+                  className={`rounded-2xl p-4 max-w-md ${msg.role === "user" ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-muted/50 text-foreground rounded-tl-sm"}`}
                 >
                   <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                 </div>
@@ -184,7 +190,7 @@ export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
         {/* Chat Input */}
         <div className="border-t border-border p-4">
           <div className="flex items-end space-x-3">
-            <FileUpload onFileUpload={handleFileUpload} sessionId={sessionId} />
+            <FileUpload onFileUpload={handleFileUpload} onAnalysisComplete={handleAnalysisComplete} sessionId={sessionId} />
             <VoiceInput onTranscript={handleVoiceInput} language={selectedLanguage} />
 
             <div className="flex-1 relative">
