@@ -19,14 +19,13 @@ const genAI = new GoogleGenerativeAI(apiKey);
 // Chat / Legal Advice
 // ========================== 
 export async function generateLegalAdvice(userQuestion: string, documentContext?: string): Promise<string> {
-  let systemPrompt = `You are an AI-powered legal advisor specializing in providing information about basic laws in India. 
+  let systemPrompt = `You are an AI-powered legal advisor specializing in providing information about basic laws in Malaysia. 
 Your role is to help users understand legal concepts in simple and clear language.
 
 Guidelines:
 1. Provide general legal information only (not personal legal advice).
 2. Keep answers short, clear, and easy to understand.
 3. Cover topics such as:
-   - Indian Penal Code (IPC) basics
    - Fundamental rights and duties
    - Consumer rights
    - Cyber laws
@@ -35,8 +34,8 @@ Guidelines:
    - Family law (marriage, divorce, inheritance)
    - Property law basics
 4. Always include a disclaimer: 
-   "I am not a lawyer. This is only general information about Indian laws. For legal advice specific to your case, consult a qualified advocate."
-5. If a user asks something outside Indian law or very specific to their personal case, politely redirect them to seek professional legal help.
+   "I am not a lawyer. This is only general information about Malaysian laws. For legal advice specific to your case, consult a qualified advocate."
+5. If a user asks something outside Malaysian law or very specific to their personal case, politely redirect them to seek professional legal help.
 
 Format your response clearly with bullet points where appropriate and always end with the disclaimer.`;
 
@@ -131,7 +130,7 @@ export async function analyzeDocument(filePath: string, mimeType: string): Promi
 // ========================== 
 export async function processVoiceInput(audioText: string, language: string): Promise<string> {
   const prompt = `The user has spoken in ${language}. Their message is: "${audioText}". 
-Respond about Indian laws in a clear, helpful manner. 
+Respond about Malaysian laws in a clear, helpful manner. 
 If not English, reply in the same language when possible, but always include the disclaimer.`;
 
   try {
@@ -152,47 +151,40 @@ export async function analyzeLabourContract(documentText: string): Promise<any> 
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const prompt = `
-    You are a specialized AI legal assistant for Malaysian labour contract. Your task is to analyze the provided labour contract text and classify its clauses into a "traffic light" system.
+    You are a specialized AI legal assistant for Malaysian labour contracts. Your task is to conduct a detailed analysis of the provided contract text and return a structured JSON output.
 
-    **Analysis Categories:**
-    *   **🔴 Merah (Red):** High-risk, potentially illegal, or predatory clauses under Malaysian law. These are clauses that heavily favor the either one side, or contradict the Contracts Act 1950 or other relevant legislation.
-    *   **🟡 Kuning (Yellow):** Clauses that are unusual, ambiguous, or require careful consideration and negotiation. They may not be illegal but could lead to disputes if not clarified.
-    *   **🟢 Hijau (Green):** Standard, fair, and generally acceptable clauses that are common in Malaysian labour contract.
+    **Analysis Categories (Traffic Light System):**
+    *   **🔴 Red:** Critical, high-risk, or potentially unfair clauses under Malaysian law.
+    *   **🟡 Yellow:** Clauses that are ambiguous, unusual, or require caution and clarification.
+    *   **🟢 Green:** Standard, fair, and generally acceptable clauses.
+
+    **JSON Output Structure:**
+    You must return a single, valid JSON object with the following structure. Do not include any markdown formatting or other text outside the JSON object. Each clause object MUST have a "color" property with one of three string values: 'Red', 'Yellow', or 'Green'.
+    {
+      "summary": {
+        "criticalIssues": <count_of_red_clauses>,
+        "areasForCaution": <count_of_yellow_clauses>
+      },
+      "clauses": [
+        {
+          "title": "<A concise, descriptive title for the clause>",
+          "originalText": "<The exact, verbatim text of the clause from the document>",
+          "color": "'Red' or 'Yellow' or 'Green'",
+          "explanation": "<A simple, clear explanation of what the clause means>",
+          "whyItMatters": "<Explain the potential impact or risk for the user>",
+          "suggestion": "<Provide an actionable suggestion, e.g., 'Request clarification on...', 'Negotiate to change...', 'This is a standard clause.'>"
+        }
+      ]
+    }
 
     **Instructions:**
-    1.  Thoroughly read the entire labour contract text provided.
-    2.  Identify each distinct clause or provision.
-    3.  For each clause, determine its risk level (Red, Yellow, or Green).
-    4.  Provide a **brief, simple explanation** for your classification.
-    5.  Extract the **exact original text** of the clause.
-    6.  Return the analysis as a JSON object with the following structure:
-        \
-        {
-          "analysis": [
-            {
-              "clause": "The exact text of the clause from the document...",
-              "risk": "Red",
-              "explanation": "Your brief explanation here..."
-            },
-            {
-              "clause": "Another exact clause text...",
-              "risk": "Yellow",
-              "explanation": "Your brief explanation here..."
-            },
-            {
-              "clause": "And another one...",
-              "risk": "Green",
-              "explanation": "Your brief explanation here..."
-            }
-          ]
-        }
-        \
-
-    **IMPORTANT:**
-    *   Ensure the output is **only** a valid JSON object. Do not include any introductory text, markdown formatting, or apologies.
-    *   The 'clause' field in the JSON must contain the verbatim text from the agreement to allow for frontend highlighting.
-    *   If the document is not a labour contract or is unanalyzable, return a JSON object with an "error" key: "{\"error\": \"The provided document does not appear to be a valid labour contract.\"}"
-
+    1.  Thoroughly read the entire contract text.
+    2.  Identify all distinct clauses.
+    3.  For each clause, populate all fields in the JSON structure above, especially the "color" field.
+    4.  Calculate the summary counts accurately.
+    5.  Ensure the 'originalText' is an exact match to the source document to enable frontend highlighting.
+    6.  If the document is not a labour contract or is unanalyzable, return a JSON object with an "error" key: 
+    
     Now, analyze the following labour contract:
   `;
 
@@ -204,6 +196,41 @@ export async function analyzeLabourContract(documentText: string): Promise<any> 
     const jsonString = responseText.replace(/```json|```/g, "").trim();
     
     const analysisResult = JSON.parse(jsonString);
+
+    // Normalize color values and then calculate the summary
+    if (analysisResult.clauses && Array.isArray(analysisResult.clauses)) {
+      analysisResult.clauses.forEach((c: any) => {
+        if (typeof c.color === 'string') {
+          const color = c.color.toLowerCase();
+          if (color.includes('red')) {
+            c.color = 'Red';
+          } else if (color.includes('yellow')) {
+            c.color = 'Yellow';
+          } else { // Includes green or any other string
+            c.color = 'Green';
+          }
+        } else { // color property is missing or not a string
+          c.color = 'Green';
+        }
+      });
+
+      const criticalIssues = analysisResult.clauses.filter((c: any) => c.color === 'Red').length;
+      const areasForCaution = analysisResult.clauses.filter((c: any) => c.color === 'Yellow').length;
+      analysisResult.summary = {
+        criticalIssues,
+        areasForCaution,
+      };
+    } else {
+      // If there are no clauses, ensure summary exists and is zeroed out.
+      analysisResult.summary = {
+        criticalIssues: 0,
+        areasForCaution: 0,
+      };
+    }
+
+    // Add the full document text to the response for the frontend
+    analysisResult.documentText = documentText;
+
     return analysisResult;
 
   } catch (error) {
@@ -214,14 +241,26 @@ export async function analyzeLabourContract(documentText: string): Promise<any> 
   }
 }
 
+
+
 export async function analyzeLabourContractFile(filePath: string, mimeType: string): Promise<any> {
   let documentText = "";
 
   try {
     if (mimeType === "application/pdf") {
-      const dataBuffer = fs.readFileSync(filePath);
-      const data = await pdf(dataBuffer);
-      documentText = data.text;
+      const fileBytes = fs.readFileSync(filePath);
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+      const response = await model.generateContent([
+        {
+          inlineData: {
+            data: fileBytes.toString("base64"),
+            mimeType: mimeType,
+          },
+        },
+        "Extract all text from this document. If the document contains images of text (scanned document), perform OCR to extract the text."
+      ]);
+      documentText = response.response.text();
     } else if (mimeType.startsWith("image/")) {
       const imageBytes = fs.readFileSync(filePath);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -240,8 +279,8 @@ export async function analyzeLabourContractFile(filePath: string, mimeType: stri
       documentText = fs.readFileSync(filePath, "utf-8");
     }
 
-    if (!documentText) {
-      return { error: "Could not extract text from the document." };
+    if (!documentText.trim()) {
+      return { error: "Could not extract text from the document. The document might be empty, a scanned image that is hard to read, or in an unsupported format." };
     }
 
     return await analyzeLabourContract(documentText);
