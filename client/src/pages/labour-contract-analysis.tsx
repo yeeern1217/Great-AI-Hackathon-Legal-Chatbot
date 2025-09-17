@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
+import jsPDF from 'jspdf';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -228,9 +229,77 @@ export default function LabourContractAnalysis() {
     element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   
-  const handleExport = () => {
-    // Placeholder for PDF export functionality
-    alert("PDF export functionality is not yet implemented.");
+  const handleExport = (result: AnalysisResult | null) => {
+    if (!result) return;
+
+    const doc = new jsPDF();
+    const margin = 15;
+    let y = margin;
+
+    // Title
+    doc.setFontSize(22);
+    doc.text("Labour Contract Analysis Report", margin, y);
+    y += 15;
+
+    // Summary
+    doc.setFontSize(16);
+    doc.text("Overall Summary", margin, y);
+    y += 8;
+
+    doc.setFontSize(12);
+    doc.setTextColor(220, 53, 69); // Red
+    doc.text(`Critical Issues: ${result.summary.criticalIssues}`, margin, y);
+    y += 7;
+
+    doc.setTextColor(255, 193, 7); // Yellow
+    doc.text(`Areas for Caution: ${result.summary.areasForCaution}`, margin, y);
+    y += 15;
+    doc.setTextColor(0, 0, 0); // Reset color
+
+    // Detailed Breakdown
+    doc.setFontSize(16);
+    doc.text("Detailed Breakdown", margin, y);
+    y += 10;
+
+    result.clauses.forEach((clause) => {
+      if (y > 260) { // Check for page break
+        doc.addPage();
+        y = margin;
+      }
+
+      // Clause Title
+      doc.setFontSize(14);
+      let titleColor: [number, number, number] = [0, 0, 0];
+      if (clause.color === 'Red') titleColor = [220, 53, 69];
+      if (clause.color === 'Yellow') titleColor = [255, 193, 7];
+      if (clause.color === 'Green') titleColor = [25, 135, 84];
+      doc.setTextColor(...titleColor);
+      doc.text(clause.title, margin, y);
+      doc.setTextColor(0, 0, 0);
+      y += 8;
+
+      // Content
+      doc.setFontSize(10);
+      
+      const addWrappedText = (label: string, text: string) => {
+        const splitText = doc.splitTextToSize(`${label}: ${text}`, 180);
+        if (y + (splitText.length * 5) > 280) {
+            doc.addPage();
+            y = margin;
+        }
+        doc.text(splitText, margin + 5, y);
+        y += (splitText.length * 5) + 3;
+      }
+
+      addWrappedText("Explanation", clause.explanation);
+      addWrappedText("Why It Matters", clause.whyItMatters);
+      addWrappedText("Suggestion", clause.suggestion);
+      
+      y += 5; // Extra space between clauses
+    });
+
+
+    doc.save("labour-contract-analysis.pdf");
   };
 
   return (
@@ -276,7 +345,7 @@ export default function LabourContractAnalysis() {
             <Card>
               <CardHeader className="flex flex-row justify-between items-center">
                 <CardTitle>Interactive Document Viewer</CardTitle>
-                 <Button variant="outline" size="sm" onClick={handleExport}>
+                 <Button variant="outline" size="sm" onClick={() => handleExport(analysisResult)}>
                   <Download className="mr-2 h-4 w-4" />
                   Export
                 </Button>
