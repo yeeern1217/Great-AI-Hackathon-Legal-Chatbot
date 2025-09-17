@@ -7,14 +7,14 @@ import Header from "@/components/layout/header";
 import Home from "@/pages/home";
 import Portals from "@/pages/portals";
 import NotFound from "@/pages/not-found";
-import TenancyAgreementAnalysis from "@/pages/tenancy-agreement-analysis";
+import LabourContractAnalysis from "@/pages/labour-contract-analysis";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/portals" component={Portals} />
-      <Route path="/tenancy-agreement-analysis" component={TenancyAgreementAnalysis} />
+      <Route path="/labour-contract-analysis" component={LabourContractAnalysis} />
       <Route component={NotFound} />
     </Switch>
   );

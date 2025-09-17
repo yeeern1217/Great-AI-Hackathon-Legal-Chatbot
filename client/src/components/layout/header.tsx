@@ -8,7 +8,7 @@ export default function Header() {
 
   const navItems = [
     { path: "/", label: "Chat Assistant", icon: MessageCircle },
-    { path: "/tenancy-agreement-analysis", label: "Tenancy Analysis", icon: FileScan },
+    { path: "/labour-contract-analysis", label: "Labour Contract Analysis", icon: FileScan },
     { path: "/portals", label: "Gov Portals", icon: ExternalLink }
   ];
 

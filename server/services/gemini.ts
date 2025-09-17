@@ -146,21 +146,21 @@ If not English, reply in the same language when possible, but always include the
 }
 
 // =================================
-// Tenancy Agreement Visual Analysis
+// Labour Contract Visual Analysis
 // =================================
-export async function analyzeTenancyAgreement(documentText: string): Promise<any> {
+export async function analyzeLabourContract(documentText: string): Promise<any> {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const prompt = `
-    You are a specialized AI legal assistant for Malaysian tenancy agreements. Your task is to analyze the provided tenancy agreement text and classify its clauses into a "traffic light" system.
+    You are a specialized AI legal assistant for Malaysian labour contract. Your task is to analyze the provided labour contract text and classify its clauses into a "traffic light" system.
 
     **Analysis Categories:**
-    *   **🔴 Merah (Red):** High-risk, potentially illegal, or predatory clauses under Malaysian law. These are clauses that heavily favor the landlord, are unenforceable, or contradict the Contracts Act 1950 or other relevant legislation.
+    *   **🔴 Merah (Red):** High-risk, potentially illegal, or predatory clauses under Malaysian law. These are clauses that heavily favor the either one side, or contradict the Contracts Act 1950 or other relevant legislation.
     *   **🟡 Kuning (Yellow):** Clauses that are unusual, ambiguous, or require careful consideration and negotiation. They may not be illegal but could lead to disputes if not clarified.
-    *   **🟢 Hijau (Green):** Standard, fair, and generally acceptable clauses that are common in Malaysian tenancy agreements.
+    *   **🟢 Hijau (Green):** Standard, fair, and generally acceptable clauses that are common in Malaysian labour contract.
 
     **Instructions:**
-    1.  Thoroughly read the entire tenancy agreement text provided.
+    1.  Thoroughly read the entire labour contract text provided.
     2.  Identify each distinct clause or provision.
     3.  For each clause, determine its risk level (Red, Yellow, or Green).
     4.  Provide a **brief, simple explanation** for your classification.
@@ -191,9 +191,9 @@ export async function analyzeTenancyAgreement(documentText: string): Promise<any
     **IMPORTANT:**
     *   Ensure the output is **only** a valid JSON object. Do not include any introductory text, markdown formatting, or apologies.
     *   The 'clause' field in the JSON must contain the verbatim text from the agreement to allow for frontend highlighting.
-    *   If the document is not a tenancy agreement or is unanalyzable, return a JSON object with an "error" key: "{\"error\": \"The provided document does not appear to be a valid tenancy agreement.\"}"
+    *   If the document is not a labour contract or is unanalyzable, return a JSON object with an "error" key: "{\"error\": \"The provided document does not appear to be a valid labour contract.\"}"
 
-    Now, analyze the following tenancy agreement:
+    Now, analyze the following labour contract:
   `;
 
   try {
@@ -207,14 +207,14 @@ export async function analyzeTenancyAgreement(documentText: string): Promise<any
     return analysisResult;
 
   } catch (error) {
-    console.error("Tenancy agreement analysis error:", error);
+    console.error("Labour contract analysis error:", error);
     return {
-      error: "Failed to analyze the tenancy agreement due to a technical issue. Please try again."
+      error: "Failed to analyze the labour contract due to a technical issue. Please try again."
     };
   }
 }
 
-export async function analyzeTenancyAgreementFile(filePath: string, mimeType: string): Promise<any> {
+export async function analyzeLabourContractFile(filePath: string, mimeType: string): Promise<any> {
   let documentText = "";
 
   try {
@@ -244,10 +244,10 @@ export async function analyzeTenancyAgreementFile(filePath: string, mimeType: st
       return { error: "Could not extract text from the document." };
     }
 
-    return await analyzeTenancyAgreement(documentText);
+    return await analyzeLabourContract(documentText);
 
   } catch (error) {
-    console.error("Tenancy agreement file analysis error:", error);
+    console.error("Labour contract file analysis error:", error);
     return {
       error: "Failed to analyze the file due to a technical issue. Please try again."
     };

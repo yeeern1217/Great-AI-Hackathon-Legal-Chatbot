@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertChatMessageSchema, insertChatSessionSchema } from "@shared/schema";
-import { generateLegalAdvice, analyzeDocument, analyzeTenancyAgreement, analyzeTenancyAgreementFile } from "./services/gemini";
+import { generateLegalAdvice, analyzeDocument, analyzeLabourContract, analyzeLabourContractFile } from "./services/gemini";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -111,15 +111,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Tenancy agreement analysis endpoint (text)
-  app.post("/api/analyze-tenancy-agreement", async (req, res) => {
+  //  Labour contract analysis endpoint (text)
+  app.post("/api/analyze-labour-contract", async (req, res) => {
     try {
       const { documentText } = req.body;
       if (!documentText) {
         return res.status(400).json({ message: "No document text provided" });
       }
 
-      const analysisResult = await analyzeTenancyAgreement(documentText);
+      const analysisResult = await analyzeLabourContract(documentText);
       res.json(analysisResult);
 
     } catch (error: any) {
@@ -127,14 +127,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Tenancy agreement analysis endpoint (file)
-  app.post("/api/analyze-tenancy-agreement-file", upload.single('file'), async (req, res) => {
+  // Labour contract analysis endpoint (file)
+  app.post("/api/analyze-labour-contract-file", upload.single('file'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const analysisResult = await analyzeTenancyAgreementFile(req.file.path, req.file.mimetype);
+      const analysisResult = await analyzeLabourContractFile(req.file.path, req.file.mimetype);
       res.json(analysisResult);
 
     } catch (error: any) {

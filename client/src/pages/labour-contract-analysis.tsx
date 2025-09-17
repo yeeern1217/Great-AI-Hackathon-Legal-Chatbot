@@ -16,7 +16,7 @@ interface AnalysisResult {
   error?: string;
 }
 
-export default function TenancyAgreementAnalysis() {
+export default function LabourContractAnalysis() {
   const [file, setFile] = useState<File | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +24,7 @@ export default function TenancyAgreementAnalysis() {
   const mutation = useMutation({
     mutationFn: async (formData: FormData) => {
       setIsLoading(true);
-      const response = await fetch("/api/analyze-tenancy-agreement-file", {
+      const response = await fetch("/api/analyze-labour-contract-file", {
         method: "POST",
         body: formData,
       });
@@ -70,12 +70,12 @@ export default function TenancyAgreementAnalysis() {
     <main className="max-w-4xl mx-auto px-4 py-6">
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Tenancy Agreement Analysis</CardTitle>
+          <CardTitle> Labour Contract Analysis</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid w-full max-w-sm items-center gap-1.5">
-            <Label htmlFor="tenancy-agreement">Upload your agreement (PDF, image, or text)</Label>
-            <Input id="tenancy-agreement" type="file" onChange={handleFileChange} accept=".txt,.md,image/*,application/pdf" />
+            <Label htmlFor="labour-contract">Upload your agreement (PDF, image, or text)</Label>
+            <Input id="labour-contract" type="file" onChange={handleFileChange} accept=".txt,.md,image/*,application/pdf" />
           </div>
           <Button onClick={handleAnalyzeClick} disabled={!file || isLoading} className="mt-4">
             {isLoading ? "Analyzing..." : "Analyze Document"}
