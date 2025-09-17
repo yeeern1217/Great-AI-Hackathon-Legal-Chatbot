@@ -67,42 +67,60 @@ const getRiskAssets = (risk: 'Red' | 'Yellow' | 'Green' | undefined) => {
 // ===== SUB-COMPONENTS =====
 
 const DocumentViewer = ({ documentText, clauses, onClauseClick }: { documentText: string; clauses: Clause[]; onClauseClick: (index: number) => void; }) => {
-  if (!clauses || clauses.length === 0) {
-    return <pre className="whitespace-pre-wrap font-sans">{documentText}</pre>;
-  }
+  const parts = useMemo(() => {
+    if (!clauses || clauses.length === 0) {
+      return [{ type: 'text', content: documentText, clauseIndex: -1 }];
+    }
+
+    const processedParts: { type: 'text' | 'clause'; content: string; clauseIndex: number }[] = [];
+    let lastIndex = 0;
+
+    clauses.forEach((clause, index) => {
+      const startIndex = documentText.indexOf(clause.originalText, lastIndex);
+      if (startIndex !== -1) {
+        if (startIndex > lastIndex) {
+          processedParts.push({ type: 'text', content: documentText.substring(lastIndex, startIndex), clauseIndex: -1 });
+        }
+        processedParts.push({ type: 'clause', content: clause.originalText, clauseIndex: index });
+        lastIndex = startIndex + clause.originalText.length;
+      }
+    });
+
+    if (lastIndex < documentText.length) {
+      processedParts.push({ type: 'text', content: documentText.substring(lastIndex), clauseIndex: -1 });
+    }
+
+    return processedParts;
+  }, [documentText, clauses]);
 
   const getHighlightColor = (color: 'Red' | 'Yellow' | 'Green') => {
     switch (color) {
-      case 'Red': return 'bg-red-200/80';
-      case 'Yellow': return 'bg-yellow-200/80';
-      case 'Green': return 'bg-green-200/80';
+      case 'Red': return 'bg-red-100 border-red-200';
+      case 'Yellow': return 'bg-yellow-100 border-yellow-200';
+      case 'Green': return 'bg-green-100 border-green-200';
     }
-  }
+  };
 
-  let lastIndex = 0;
-  const parts: (string | JSX.Element)[] = [];
-
-  clauses.forEach((clause, index) => {
-    const startIndex = documentText.indexOf(clause.originalText, lastIndex);
-    if (startIndex !== -1) {
-      parts.push(documentText.substring(lastIndex, startIndex));
-      parts.push(
-        <span
-          key={index}
-          id={`highlight-${index}`}
-          className={`cursor-pointer rounded px-1 ${getHighlightColor(clause.color)}`}
-          onClick={() => onClauseClick(index)}
-        >
-          {clause.originalText}
-        </span>
-      );
-      lastIndex = startIndex + clause.originalText.length;
-    }
-  });
-
-  parts.push(documentText.substring(lastIndex));
-
-  return <pre className="whitespace-pre-wrap font-sans">{parts}</pre>;
+  return (
+    <div className="space-y-2">
+      {parts.map((part, index) => {
+        if (part.type === 'clause') {
+          const clause = clauses[part.clauseIndex];
+          return (
+            <div
+              key={index}
+              id={`highlight-${part.clauseIndex}`}
+              className={`cursor-pointer rounded-md border p-3 ${getHighlightColor(clause.color)}`}
+              onClick={() => onClauseClick(part.clauseIndex)}
+            >
+              <p className="font-sans whitespace-pre-wrap">{part.content}</p>
+            </div>
+          );
+        }
+        return <p key={index} className="font-sans whitespace-pre-wrap">{part.content}</p>;
+      })}
+    </div>
+  );
 };
 
 const ClauseCard = ({ clause, index }: { clause: Clause; index: number }) => {
