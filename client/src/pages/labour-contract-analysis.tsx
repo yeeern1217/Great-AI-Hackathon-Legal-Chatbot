@@ -1,13 +1,14 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
 import jsPDF from 'jspdf';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Download, AlertCircle, CheckCircle, Info } from "lucide-react";
+import { Download, AlertCircle, CheckCircle, Info, FileText, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
+import { PieChart, Pie, Cell, Tooltip } from 'recharts';
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 
 // ===== TYPESCRIPT INTERFACES =====
 interface Clause {
@@ -37,28 +38,28 @@ const getRiskAssets = (risk: 'Red' | 'Yellow' | 'Green' | undefined) => {
         bgColor: 'bg-red-100',
         borderColor: 'border-red-500',
         textColor: 'text-red-800',
-        icon: <AlertCircle className="h-5 w-5 text-red-600" />,
+        icon: <ShieldAlert className="h-5 w-5 text-red-600" />,
       };
     case 'Yellow':
       return {
         bgColor: 'bg-yellow-100',
         borderColor: 'border-yellow-500',
         textColor: 'text-yellow-800',
-        icon: <Info className="h-5 w-5 text-yellow-600" />,
+        icon: <Shield className="h-5 w-5 text-yellow-600" />,
       };
     case 'Green':
       return {
         bgColor: 'bg-green-100',
         borderColor: 'border-green-500',
         textColor: 'text-green-800',
-        icon: <CheckCircle className="h-5 w-5 text-green-600" />,
+        icon: <ShieldCheck className="h-5 w-5 text-green-600" />,
       };
     default:
       return {
         bgColor: 'bg-gray-100',
         borderColor: 'border-gray-400',
         textColor: 'text-gray-800',
-        icon: null,
+        icon: <FileText className="h-5 w-5 text-gray-600" />,
       };
   }
 };
@@ -72,9 +73,9 @@ const DocumentViewer = ({ documentText, clauses, onClauseClick }: { documentText
 
   const getHighlightColor = (color: 'Red' | 'Yellow' | 'Green') => {
     switch (color) {
-      case 'Red': return 'bg-red-200';
-      case 'Yellow': return 'bg-yellow-200';
-      case 'Green': return 'bg-green-200';
+      case 'Red': return 'bg-red-200/80';
+      case 'Yellow': return 'bg-yellow-200/80';
+      case 'Green': return 'bg-green-200/80';
     }
   }
 
@@ -84,9 +85,7 @@ const DocumentViewer = ({ documentText, clauses, onClauseClick }: { documentText
   clauses.forEach((clause, index) => {
     const startIndex = documentText.indexOf(clause.originalText, lastIndex);
     if (startIndex !== -1) {
-      // Add the text before the clause
       parts.push(documentText.substring(lastIndex, startIndex));
-      // Add the highlighted clause
       parts.push(
         <span
           key={index}
@@ -101,12 +100,10 @@ const DocumentViewer = ({ documentText, clauses, onClauseClick }: { documentText
     }
   });
 
-  // Add the remaining text after the last clause
   parts.push(documentText.substring(lastIndex));
 
   return <pre className="whitespace-pre-wrap font-sans">{parts}</pre>;
 };
-
 
 const ClauseCard = ({ clause, index }: { clause: Clause; index: number }) => {
   const { bgColor, borderColor, textColor, icon } = getRiskAssets(clause.color);
@@ -119,7 +116,7 @@ const ClauseCard = ({ clause, index }: { clause: Clause; index: number }) => {
           <span className="ml-2">{clause.title}</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 pt-2">
         <div>
           <h4 className="font-semibold">Simple Explanation</h4>
           <p className="text-sm">{clause.explanation}</p>
@@ -142,35 +139,104 @@ const ClauseCard = ({ clause, index }: { clause: Clause; index: number }) => {
   );
 };
 
-const AnalysisPanel = ({ result }: { result: AnalysisResult }) => {
-  const { summary, clauses } = result;
+const DashboardView = ({ result }: { result: AnalysisResult }) => {
+  const [filter, setFilter] = useState<'All' | 'Red' | 'Yellow' | 'Green'>('All');
+
+  const greenClauses = result.clauses.length - result.summary.criticalIssues - result.summary.areasForCaution;
+  const totalClauses = result.clauses.length;
+  const healthScore = totalClauses > 0 ? Math.round(((totalClauses - result.summary.criticalIssues - result.summary.areasForCaution * 0.5) / totalClauses) * 100) : 100;
+
+  const chartConfig = {
+    critical: { label: "Critical", color: "#dc2626" }, // red-600
+    caution: { label: "Caution", color: "#f59e0b" }, // amber-500
+    standard: { label: "Standard", color: "#22c55e" }, // green-500
+  }
+
+  const chartData = [
+    { name: 'Critical', value: result.summary.criticalIssues, fill: chartConfig.critical.color },
+    { name: 'Caution', value: result.summary.areasForCaution, fill: chartConfig.caution.color },
+    { name: 'Standard', value: greenClauses, fill: chartConfig.standard.color },
+  ];
+
+  const filteredClauses = useMemo(() => {
+    if (filter === 'All') return result.clauses;
+    return result.clauses.filter(c => c.color === filter);
+  }, [filter, result.clauses]);
 
   return (
     <div className="space-y-6">
-      {/* Overall Summary */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Health Score</CardTitle>
+            <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{healthScore}%</div>
+            <p className="text-xs text-muted-foreground">Based on issue severity</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-red-600">Critical Issues</CardTitle>
+            <ShieldAlert className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{result.summary.criticalIssues}</div>
+            <p className="text-xs text-muted-foreground">High-risk clauses found</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-yellow-600">Areas for Caution</CardTitle>
+            <Shield className="h-4 w-4 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">{result.summary.areasForCaution}</div>
+            <p className="text-xs text-muted-foreground">Ambiguous clauses found</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-green-600">Standard Clauses</CardTitle>
+            <ShieldCheck className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{greenClauses}</div>
+            <p className="text-xs text-muted-foreground">Fair clauses found</p>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
         <CardHeader>
-          <CardTitle>Overall Summary</CardTitle>
+          <CardTitle>Clause Distribution</CardTitle>
         </CardHeader>
-        <CardContent className="flex justify-around">
-          <div className="text-center">
-            <p className="text-3xl font-bold text-red-600">{summary?.criticalIssues ?? 0}</p>
-            <p className="text-sm text-red-600">Critical Issues</p>
-          </div>
-          <div className="text-center">
-            <p className="text-3xl font-bold text-yellow-600">{summary?.areasForCaution ?? 0}</p>
-            <p className="text-sm text-yellow-600">Areas for Caution</p>
-          </div>
+        <CardContent>
+          <ChartContainer config={chartConfig} className="mx-auto aspect-square h-[250px]">
+            <PieChart>
+              <Tooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+              <Pie data={chartData} dataKey="value" nameKey="name" innerRadius={60} strokeWidth={5}>
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Pie>
+            </PieChart>
+          </ChartContainer>
         </CardContent>
       </Card>
 
-      {/* Detailed Breakdown */}
       <div>
-        <h3 className="text-xl font-bold mb-4">Detailed Breakdown</h3>
-        {(clauses ?? []).sort((a, b) => {
-          const order = { Red: 0, Yellow: 1, Green: 2 };
-          return order[a.color] - order[b.color];
-        }).map((clause, index) => (
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-bold">Detailed Breakdown</h3>
+          <div className="flex space-x-2">
+            <Button variant={filter === 'All' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('All')}>All</Button>
+            <Button variant={filter === 'Red' ? 'destructive' : 'outline'} size="sm" onClick={() => setFilter('Red')}>Red</Button>
+            <Button variant={filter === 'Yellow' ? 'secondary' : 'outline'} size="sm" onClick={() => setFilter('Yellow')}>Yellow</Button>
+            <Button variant={filter === 'Green' ? 'ghost' : 'outline'} size="sm" onClick={() => setFilter('Green')}>Green</Button>
+          </div>
+        </div>
+        {filteredClauses.map((clause, index) => (
           <ClauseCard key={index} clause={clause} index={index} />
         ))}
       </div>
@@ -213,7 +279,7 @@ export default function LabourContractAnalysis() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       setFile(event.target.files[0]);
-      setAnalysisResult(null); // Reset on new file selection
+      setAnalysisResult(null);
     }
   };
 
@@ -236,38 +302,34 @@ export default function LabourContractAnalysis() {
     const margin = 15;
     let y = margin;
 
-    // Title
     doc.setFontSize(22);
     doc.text("Labour Contract Analysis Report", margin, y);
     y += 15;
 
-    // Summary
     doc.setFontSize(16);
     doc.text("Overall Summary", margin, y);
     y += 8;
 
     doc.setFontSize(12);
-    doc.setTextColor(220, 53, 69); // Red
+    doc.setTextColor(220, 53, 69);
     doc.text(`Critical Issues: ${result.summary.criticalIssues}`, margin, y);
     y += 7;
 
-    doc.setTextColor(255, 193, 7); // Yellow
+    doc.setTextColor(255, 193, 7);
     doc.text(`Areas for Caution: ${result.summary.areasForCaution}`, margin, y);
     y += 15;
-    doc.setTextColor(0, 0, 0); // Reset color
+    doc.setTextColor(0, 0, 0);
 
-    // Detailed Breakdown
     doc.setFontSize(16);
     doc.text("Detailed Breakdown", margin, y);
     y += 10;
 
     result.clauses.forEach((clause) => {
-      if (y > 260) { // Check for page break
+      if (y > 260) {
         doc.addPage();
         y = margin;
       }
 
-      // Clause Title
       doc.setFontSize(14);
       let titleColor: [number, number, number] = [0, 0, 0];
       if (clause.color === 'Red') titleColor = [220, 53, 69];
@@ -278,7 +340,6 @@ export default function LabourContractAnalysis() {
       doc.setTextColor(0, 0, 0);
       y += 8;
 
-      // Content
       doc.setFontSize(10);
       
       const addWrappedText = (label: string, text: string) => {
@@ -295,16 +356,14 @@ export default function LabourContractAnalysis() {
       addWrappedText("Why It Matters", clause.whyItMatters);
       addWrappedText("Suggestion", clause.suggestion);
       
-      y += 5; // Extra space between clauses
+      y += 5;
     });
-
 
     doc.save("labour-contract-analysis.pdf");
   };
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-6">
-      {/* Header & Upload Section */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Labour Contract Analysis</CardTitle>
@@ -320,7 +379,6 @@ export default function LabourContractAnalysis() {
         </CardContent>
       </Card>
 
-      {/* Loading State */}
       {isLoading && (
         <div className="flex items-center justify-center p-10">
           <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32"></div>
@@ -328,7 +386,6 @@ export default function LabourContractAnalysis() {
         </div>
       )}
 
-      {/* Error State */}
       {analysisResult?.error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -337,10 +394,8 @@ export default function LabourContractAnalysis() {
         </Alert>
       )}
 
-      {/* Results Display */}
       {analysisResult && !analysisResult.error && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Panel A: Document Viewer */}
           <div className="md:sticky top-6 h-fit">
             <Card>
               <CardHeader className="flex flex-row justify-between items-center">
@@ -360,9 +415,8 @@ export default function LabourContractAnalysis() {
             </Card>
           </div>
 
-          {/* Panel B: AI Analysis */}
           <div ref={analysisPanelRef}>
-            <AnalysisPanel result={analysisResult} />
+            <DashboardView result={analysisResult} />
           </div>
         </div>
       )}
