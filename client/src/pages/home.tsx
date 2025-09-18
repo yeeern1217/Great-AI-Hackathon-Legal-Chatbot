@@ -1,159 +1,179 @@
-import { useState, useEffect } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import ChatInterface from "@/components/chat-interface";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Scale, Zap, Book, FileText, Mic, Languages, Shield } from "lucide-react";
-import type { ChatSession, ChatMessage } from "@shared/schema";
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import HeroSection from '@/components/hero-section';
+import { MessageCircle, FileCheck, Users, Shield, Clock, Award } from 'lucide-react';
+import { useLanguage } from '@/hooks/use-language';
 
-export default function Home() {
-  const [sessionId, setSessionId] = useState<string | null>(null);
-
-  // Create or get existing session
-  const createSessionMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/chat/session", {
-        title: "Legal Consultation"
-      });
-      return response.json() as Promise<ChatSession>;
-    },
-    onSuccess: (session) => {
-      setSessionId(session.id);
-      queryClient.invalidateQueries({ queryKey: ["/api/chat/session", session.id] });
-    }
-  });
-
-  // Initialize session on component mount
-  useEffect(() => {
-    if (!sessionId) {
-      createSessionMutation.mutate();
-    }
-  }, [sessionId]);
-
-  const legalTopics = [
-    "IPC Basics",
-    "Consumer Rights", 
-    "Cyber Laws",
-    "Property Law",
-    "Family Law",
-    "Labor Rights"
-  ];
+const Home = () => {
+  const { t } = useLanguage();
 
   const features = [
     {
-      icon: FileText,
-      title: "Upload legal documents",
-      description: "Analyze contracts, agreements, and legal papers"
+      icon: MessageCircle,
+      title: t('features.chatbot.title'),
+      description: t('features.chatbot.desc'),
+      href: '/chat',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
     },
     {
-      icon: Mic,
-      title: "Voice input support",
-      description: "Speak naturally in your preferred language"
+      icon: FileCheck,
+      title: t('features.checker.title'),
+      description: t('features.checker.desc'),
+      href: '/checker',
+      color: 'text-warning',
+      bgColor: 'bg-warning/10',
     },
     {
-      icon: Languages,
-      title: "Multi-language support",
-      description: "Hindi, Bengali, Telugu, Tamil, and more"
+      icon: Users,
+      title: t('features.experts.title'),
+      description: t('features.experts.desc'),
+      href: '/experts',
+      color: 'text-success',
+      bgColor: 'bg-success/10',
     },
-    {
-      icon: Shield,
-      title: "Secure & Private",
-      description: "Your conversations are kept confidential"
-    }
+  ];
+
+  const benefits = [
+    { icon: Shield, title: 'Compliance Check', desc: 'Ensure contracts follow Malaysian Employment Act' },
+    { icon: Clock, title: 'Instant Analysis', desc: 'Get results in minutes, not days' },
+    { icon: Award, title: 'Expert Verified', desc: 'AI trained by Malaysian legal experts' },
   ];
 
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Hero Section */}
-      <div className="gradient-bg rounded-2xl p-8 text-white mb-8">
-        <div className="max-w-3xl">
-          <h2 className="text-3xl font-bold mb-4">AI-Powered Legal Assistant for Indian Laws</h2>
-          <p className="text-lg opacity-90 mb-6">
-            Get instant information about Indian legal concepts, your rights, and basic legal procedures. 
-            Upload documents, speak in your language, and get clear explanations.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            {legalTopics.map((topic) => (
-              <Badge key={topic} variant="secondary" className="bg-white/20 text-white border-white/30">
-                {topic}
-              </Badge>
+    <div className="min-h-screen">
+      {/* Hero */}
+      <HeroSection />
+
+      {/* Features */}
+      <section className="py-20 bg-background">
+        <div className="container px-4">
+          <div className="text-center mb-16">
+            <h2 className="font-heading text-3xl font-bold text-foreground mb-4">
+              {t('features.title')}
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              {t('features.subtitle')}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {features.map((feature) => (
+              <Card
+                key={feature.title}
+                className="group hover:shadow-card transition-all duration-300 hover:-translate-y-1 border-border/50"
+              >
+                <CardContent className="p-8 text-center">
+                  <div
+                    className={`inline-flex items-center justify-center w-16 h-16 rounded-xl ${feature.bgColor} ${feature.color} mb-6`}
+                  >
+                    <feature.icon className="h-8 w-8" />
+                  </div>
+
+                  <h3 className="font-heading text-xl font-semibold text-foreground mb-3">
+                    {feature.title}
+                  </h3>
+
+                  <p className="text-muted-foreground mb-6 leading-relaxed">
+                    {feature.description}
+                  </p>
+
+                  <Button asChild variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground">
+                    <Link to={feature.href}>Get Started</Link>
+                  </Button>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Chat Interface */}
-        <div className="lg:col-span-2">
-          {sessionId ? (
-            <ChatInterface sessionId={sessionId} />
-          ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Initializing legal assistant...</p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+      {/* Benefits */}
+      <section className="py-20 bg-muted/30">
+        <div className="container px-4">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="font-heading text-3xl font-bold text-foreground mb-6">
+                Why Choose Our AI Legal Assistant?
+              </h2>
+              <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                Built specifically for Malaysian employment law, our AI understands local regulations and cultural context to provide accurate, relevant advice.
+              </p>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Features Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Zap className="mr-2 h-5 w-5 text-accent" />
-                Features
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {features.map((feature, index) => (
-                <div key={index} className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="h-4 w-4 text-accent" />
+              <div className="space-y-6">
+                {benefits.map((benefit) => (
+                  <div key={benefit.title} className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <benefit.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-1">{benefit.title}</h4>
+                      <p className="text-muted-foreground">{benefit.desc}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{feature.title}</p>
-                    <p className="text-xs text-muted-foreground">{feature.description}</p>
+                ))}
+              </div>
+            </div>
+
+            {/* Example Contract Analysis */}
+            <div className="relative">
+              <div className="bg-card rounded-xl p-8 shadow-card border border-border">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-danger" />
+                    <span className="text-sm font-medium">High Risk Clauses Found</span>
+                  </div>
+                  <div className="bg-danger/10 rounded-lg p-4">
+                    <p className="text-sm text-danger-foreground">
+                      "Employee must work minimum 60 hours per week"
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      ⚠ Exceeds Malaysian legal working hour limits
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3 mt-6">
+                    <div className="w-3 h-3 rounded-full bg-success" />
+                    <span className="text-sm font-medium">Compliant Clause</span>
+                  </div>
+                  <div className="bg-success/10 rounded-lg p-4">
+                    <p className="text-sm text-success-foreground">
+                      "Annual leave: 14 days minimum"
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      ✅ Meets Employment Act requirements
+                    </p>
                   </div>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Legal Topics Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Book className="mr-2 h-5 w-5 text-primary" />
-                Legal Topics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {[
-                { id: "ipc", label: "Indian Penal Code" },
-                { id: "fundamental-rights", label: "Fundamental Rights" },
-                { id: "consumer-protection", label: "Consumer Protection" },
-                { id: "cyber-laws", label: "Cyber Laws" },
-                { id: "labor-laws", label: "Labor Laws" },
-                { id: "property-law", label: "Property Law" }
-              ].map((topic) => (
-                <Button
-                  key={topic.id}
-                  variant="ghost"
-                  className="w-full justify-start text-sm text-muted-foreground hover:text-foreground"
-                  data-testid={`topic-${topic.id}`}
-                >
-                  {topic.label}
-                </Button>
-              ))}
-            </CardContent>
-          </Card>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </main>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 bg-gradient-to-r from-primary to-primary-hover text-primary-foreground">
+        <div className="container px-4 text-center">
+          <h2 className="font-heading text-3xl font-bold mb-4">
+            Ready to Protect Your Employment Rights?
+          </h2>
+          <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
+            Join thousands of Malaysians who trust our AI legal assistant to review their employment contracts and understand their rights.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild variant="secondary" size="lg">
+              <Link to="/chat">Start Free Chat</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="bg-white/10 border-white/20 text-white hover:bg-white hover:text-primary">
+              <Link to="/checker">Upload Contract</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+    </div>
   );
-}
+};
+
+export default Home;
