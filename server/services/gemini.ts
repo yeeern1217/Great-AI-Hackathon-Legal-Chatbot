@@ -2,7 +2,7 @@ import * as fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import pdf from "pdf-parse";
+
 
 // Load environment variables
 dotenv.config();
@@ -18,58 +18,39 @@ const genAI = new GoogleGenerativeAI(apiKey);
 // ========================== 
 // Chat / Legal Advice
 // ========================== 
+
+import axios from "axios";
 export async function generateLegalAdvice(userQuestion: string, documentContext?: string): Promise<string> {
-  let systemPrompt = `You are an AI-powered legal advisor specializing in providing information about basic laws in Malaysia. 
-Your role is to help users understand legal concepts in simple and clear language.
+  try {
+    // Define the URL for the Bedrock service
+    const bedrockUrl = "http://127.0.0.1:8000/bedrock/invoke";
 
-Guidelines:
-1. Provide general legal information only (not personal legal advice).
-2. Keep answers short, clear, and easy to understand.
-3. Cover topics such as:
-   - Fundamental rights and duties
-   - Consumer rights
-   - Cyber laws
-   - Labor laws
-   - Contract basics
-   - Family law (marriage, divorce, inheritance)
-   - Property law basics
-4. Always include a disclaimer: 
-   "I am not a lawyer. This is only general information about Malaysian laws. For legal advice specific to your case, consult a qualified advocate."
-5. If a user asks something outside Malaysian law or very specific to their personal case, politely redirect them to seek professional legal help.
+    // Prepare the request parameters
+    const params = new URLSearchParams();
+    params.append("text", userQuestion);
+    if (documentContext) {
+      params.append("document_context", documentContext);
+    }
 
-Format your response clearly with bullet points where appropriate and always end with the disclaimer.`;
+    // Make the request to the Bedrock service
+    const response = await axios.get(bedrockUrl, { params });
 
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-  
-  if (documentContext) {
-    const contextualPrompt = [
-      `You are an AI-powered legal advisor. A user has uploaded a document and is asking questions about it. Here is the summary of the document analysis:`, 
-      "--- DOCUMENT CONTEXT ---",
-      documentContext,
-      "--- END DOCUMENT CONTEXT ---",
-      "Based on the document context provided above, please answer the user's question. Adhere to all other guidelines and disclaimers.",
-      "User's Question: " + userQuestion
-    ].join('\n');
+    // Check if the response contains the expected data
+    if (response.data && response.data.assistant) {
+      return response.data.assistant;
+    } else {
+      console.error("Invalid response from Bedrock service:", response.data);
+      return "I apologize, but I received an invalid response from the legal analysis service. Please try again later.";
+    }
+  } catch (error) {
+    console.error("Error calling Bedrock service:", error);
+
+    // Provide a more specific error message if the service is unavailable
+    if (axios.isAxiosError(error) && error.code === 'ECONNREFUSED') {
+      return "I'm sorry, but the legal analysis service is currently unavailable. Please make sure the service is running and try again.";
+    }
     
-    try {
-      const response = await model.generateContent(contextualPrompt);
-      return response.response.text() || 
-        "I apologize, but I couldn't generate a response based on the document. Please try again or consult a legal professional.";
-    } catch (error) {
-      console.error("Gemini API error with context:", error);
-      return "I'm experiencing technical difficulties with the document analysis. Please try again later.";
-    }
-
-  } else {
-    // Original behavior without document context
-    try {
-      const response = await model.generateContent([systemPrompt, userQuestion]);
-      return response.response.text() || 
-        "I apologize, but I couldn't generate a response. Please try again or consult a legal professional.";
-    } catch (error) {
-      console.error("Gemini API error:", error);
-      return "I'm experiencing technical difficulties. Please try again later or consult a qualified advocate for immediate legal assistance.";
-    }
+    return "I'm experiencing technical difficulties with the legal analysis service. Please try again later.";
   }
 }
 
@@ -79,44 +60,35 @@ Format your response clearly with bullet points where appropriate and always end
 export async function analyzeDocument(filePath: string, mimeType: string): Promise<string> {
   try {
     let documentText: string | null = null;
-    const fileExtension = path.extname(filePath).toLowerCase();
 
-    // 1. Extract text from PDF or text files
     if (mimeType === "application/pdf") {
-      const dataBuffer = fs.readFileSync(filePath);
-      const data = await pdf(dataBuffer);
-      documentText = data.text;
-    } else if (mimeType.startsWith("text/") || fileExtension === '.txt' || fileExtension === '.md') {
-      documentText = fs.readFileSync(filePath, "utf-8");
-    }
-
-    // 2. If text was extracted, summarize it
-    if (documentText) {
+      const fileBytes = fs.readFileSync(filePath);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const prompt = `Summarize the following document text concisely. This summary will be used as context for a legal chat assistant. Focus on extracting the key points, parties involved, and main obligations or clauses.`;
-      const response = await model.generateContent([prompt, documentText]);
-      return response.response.text() + "\n\nDisclaimer: This analysis provides a summary for informational purposes only. For specific advice, consult a qualified advocate.";
-    }
-    // 3. If it's an image, process it
-    else if (mimeType.startsWith("image/")) {
+      const response = await model.generateContent([
+        { inlineData: { data: fileBytes.toString("base64"), mimeType: mimeType } },
+        "Extract the text from this document."
+      ]);
+      documentText = response.response.text();
+    } else if (mimeType.startsWith("text/")) {
+      documentText = fs.readFileSync(filePath, "utf-8");
+    } else if (mimeType.startsWith("image/")) {
       const imageBytes = fs.readFileSync(filePath);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
       const response = await model.generateContent([
-        {
-          inlineData: {
-            data: imageBytes.toString("base64"),
-            mimeType: mimeType,
-          },
-        },
+        { inlineData: { data: imageBytes.toString("base64"), mimeType: mimeType } },
         "Analyze this legal document image and provide a concise summary of its content. This summary will be used as context for a legal chat assistant. Focus on key points, parties involved, and main obligations or clauses. Always add a disclaimer."
       ]);
 
       return response.response.text() + "\n\nDisclaimer: This analysis provides general legal information only. For specific advice, consult a qualified advocate.";
     }
-    // 4. Otherwise, it's an unsupported format
-    else {
-      return "I can assist with PDF, text, and image files. Please upload a supported format.";
+
+    if (documentText) {
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const prompt = `Summarize the following document text concisely. This summary will be used as context for a legal chat assistant. Focus on extracting the key points, parties involved, and main obligations or clauses.`;
+      const response = await model.generateContent([prompt, documentText]);
+      return response.response.text() + "\n\nDisclaimer: This analysis provides a summary for informational purposes only. For specific advice, consult a qualified advocate.";
+    } else {
+      return "Unsupported file format. I can assist with PDF, text, and image files.";
     }
   } catch (error) {
     console.error("Document analysis error:", error);
