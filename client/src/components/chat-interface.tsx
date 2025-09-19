@@ -191,7 +191,7 @@ export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
         <div className="border-t border-border p-4">
           <div className="flex items-end space-x-3">
             <FileUpload onFileUpload={handleFileUpload} onAnalysisComplete={handleAnalysisComplete} sessionId={sessionId} />
-            <VoiceInput onTranscript={handleVoiceInput} language={selectedLanguage} />
+            {/* <VoiceInput onTranscript={handleVoiceInput} language={selectedLanguage} /> */}
 
             <div className="flex-1 relative">
               <Textarea

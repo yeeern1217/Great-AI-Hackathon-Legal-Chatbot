@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Scale, Zap, Book, FileText, Mic, Languages, Shield } from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
 import type { ChatSession, ChatMessage } from "@shared/schema";
 
 export default function Home() {
@@ -14,10 +15,15 @@ export default function Home() {
   // Create or get existing session
   const createSessionMutation = useMutation({
     mutationFn: async () => {
+      const newSessionId = uuidv4();
       const response = await apiRequest("POST", "/api/chat/session", {
+        id: newSessionId,
         title: "Legal Consultation"
       });
-      return response.json() as Promise<ChatSession>;
+      // The backend will return the created session, which might have a different ID
+      // or additional data. For now, we'll use the ID we sent.
+      const session = await response.json() as Promise<ChatSession>;
+      return { ...session, id: newSessionId };
     },
     onSuccess: (session) => {
       setSessionId(session.id);
