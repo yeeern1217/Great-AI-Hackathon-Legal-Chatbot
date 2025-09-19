@@ -1,72 +1,93 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import avatarImg from "@/assets/ai-legal-avatar.png";
 
 export default function Home() {
   return (
-    <div className="flex flex-col gap-16">
-      <section className="flex flex-col items-center justify-center text-center py-20 bg-gradient-to-b from-background to-muted/30 rounded-2xl">
-        <h1 className="text-4xl sm:text-6xl font-bold tracking-tight mb-6">
-          AI Legal Assistant
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mb-8">
-          Your trusted partner for tenancy agreement insights.  
-          Get instant contract analysis, AI-powered legal checks, and connect with expert lawyers.
-        </p>
-        <div className="flex flex-wrap gap-4 justify-center">
-          <Link href="/chat-assistant">
-            <Button size="lg" className="rounded-2xl">
-              Try Chat Assistant
-            </Button>
-          </Link>
-          <Link href="/labour-contract-analysis">
-            <Button size="lg" variant="outline" className="rounded-2xl">
-              Upload Contract
-            </Button>
-          </Link>
-          <Link href="/legal-experts">
-            <Button size="lg" variant="secondary" className="rounded-2xl">
-              Consult Experts
-            </Button>
-          </Link>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center">
+      <div className="container mx-auto px-6 lg:px-20 py-16 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        
+        {/* Left Column */}
+        <div className="space-y-6">
+          
+          {/* Sub-Headline */}
+          <p className="text-sm text-blue-600 font-medium flex items-center space-x-2">
+            <span className="h-2 w-2 bg-green-500 rounded-full inline-block" />
+            <span>Understand Your Rights. Check Your Contracts. Speak to Experts.</span>
+          </p>
+          
+          {/* Main Headline */}
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-900 leading-tight">
+            AI Labor Legal Assistant  
+            <br />
+            for Malaysians
+          </h1>
+          
+          {/* Description */}
+          <p className="text-lg text-gray-700 max-w-lg">
+            Get instant help with employment contracts and labor law questions.  
+            Our AI understands the Malaysian Employment Act and helps protect your rights.
+          </p>
+          
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link href="/chat-assistant">
+              <Button size="lg" className="rounded-full bg-blue-600 hover:bg-blue-700">
+                Chat with AI Assistant
+              </Button>
+            </Link>
+            <Link href="/labour-contract-analysis">
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full border-blue-600 text-blue-600 hover:bg-blue-50"
+              >
+                Upload Contract to Check
+              </Button>
+            </Link>
+          </div>
+          
+          {/* Stats */}
+          <div className="mt-8 flex flex-wrap gap-8">
+            <div>
+              <p className="text-2xl font-bold text-blue-900">500+</p>
+              <p className="text-sm text-gray-600">Contracts Analyzed</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-blue-900">2,000+</p>
+              <p className="text-sm text-gray-600">Users Helped</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-blue-900">95%</p>
+              <p className="text-sm text-gray-600">Satisfaction Rate</p>
+            </div>
+          </div>
         </div>
-      </section>
+        
+        {/* Right Column */}
+        <div className="relative flex justify-center">
+          
+          {/* Avatar Card */}
+          <div className="relative bg-white rounded-2xl shadow-lg p-6">
+            <img
+              src={avatarImg}
+              alt="AI Assistant Avatar"
+              className="w-64 h-64 object-cover rounded-xl"
+            />
 
-      <section className="grid gap-8 md:grid-cols-3">
-        <Card className="rounded-2xl shadow-md">
-          <CardHeader>
-            <CardTitle>AI Chat Assistant</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>
-              Get instant answers about tenancy agreements.  
-              Ask anything in plain language and our AI will assist you.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-2xl shadow-md">
-          <CardHeader>
-            <CardTitle>Contract Checker</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>
-              Upload your tenancy agreement and let AI analyze clauses, highlight risks, and suggest improvements.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-2xl shadow-md">
-          <CardHeader>
-            <CardTitle>Expert Consultation</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>
-              Connect with qualified lawyers for professional advice, tailored to your tenancy needs.
-            </p>
-          </CardContent>
-        </Card>
-      </section>
+            
+            {/* Online Tag */}
+            <span className="absolute top-4 right-4 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-medium">
+              Online 24/7
+            </span>
+          </div>
+          
+          {/* Ready to Help Badge */}
+          <div className="absolute bottom-0 -mb-4 bg-white border border-gray-200 rounded-full px-4 py-1 text-sm text-gray-700 shadow-sm">
+            ⭘ Ready to Help
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
