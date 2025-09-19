@@ -1,159 +1,101 @@
-import { useState, useEffect } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import ChatInterface from "@/components/chat-interface";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Scale, Zap, Book, FileText, Mic, Languages, Shield } from "lucide-react";
-import type { ChatSession, ChatMessage } from "@shared/schema";
+import avatarImg from "@/assets/ai-legal-avatar.jpg";
 
 export default function Home() {
-  const [sessionId, setSessionId] = useState<string | null>(null);
-
-  // Create or get existing session
-  const createSessionMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/chat/session", {
-        title: "Legal Consultation"
-      });
-      return response.json() as Promise<ChatSession>;
-    },
-    onSuccess: (session) => {
-      setSessionId(session.id);
-      queryClient.invalidateQueries({ queryKey: ["/api/chat/session", session.id] });
-    }
-  });
-
-  // Initialize session on component mount
-  useEffect(() => {
-    if (!sessionId) {
-      createSessionMutation.mutate();
-    }
-  }, [sessionId]);
-
-  const legalTopics = [
-    "IPC Basics",
-    "Consumer Rights", 
-    "Cyber Laws",
-    "Property Law",
-    "Family Law",
-    "Labor Rights"
-  ];
-
-  const features = [
-    {
-      icon: FileText,
-      title: "Upload legal documents",
-      description: "Analyze contracts, agreements, and legal papers"
-    },
-    {
-      icon: Mic,
-      title: "Voice input support",
-      description: "Speak naturally in your preferred language"
-    },
-    {
-      icon: Languages,
-      title: "Multi-language support",
-      description: "Hindi, Bengali, Telugu, Tamil, and more"
-    },
-    {
-      icon: Shield,
-      title: "Secure & Private",
-      description: "Your conversations are kept confidential"
-    }
-  ];
-
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Hero Section */}
-      <div className="gradient-bg rounded-2xl p-8 text-white mb-8">
-        <div className="max-w-3xl">
-          <h2 className="text-3xl font-bold mb-4">AI-Powered Legal Assistant for Indian Laws</h2>
-          <p className="text-lg opacity-90 mb-6">
-            Get instant information about Indian legal concepts, your rights, and basic legal procedures. 
-            Upload documents, speak in your language, and get clear explanations.
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center">
+      <div className="container mx-auto px-6 lg:px-20 py-16 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        
+        {/* Left Column */}
+        <div className="space-y-6">
+          
+          {/* Sub-Headline */}
+          <p className="text-sm text-blue-600 font-medium flex items-center space-x-2">
+            <span className="h-2 w-2 bg-green-500 rounded-full inline-block" />
+            <span>Understand Your Rights. Check Your Contracts. Speak to Experts.</span>
           </p>
-          <div className="flex flex-wrap gap-3">
-            {legalTopics.map((topic) => (
-              <Badge key={topic} variant="secondary" className="bg-white/20 text-white border-white/30">
-                {topic}
-              </Badge>
-            ))}
+          
+          {/* Main Headline */}
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-900 leading-tight">
+            AI Labor Legal Assistant  
+            <br />
+            for Malaysians
+          </h1>
+          
+          {/* Description */}
+          <p className="text-lg text-gray-700 max-w-lg">
+            Get instant help with employment contracts and labor law questions.  
+            Our AI understands the Malaysian Employment Act and helps protect your rights.
+          </p>
+          
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link href="/chat-assistant">
+              <Button size="lg" className="rounded-full bg-blue-600 hover:bg-blue-700">
+                Chat with AI Assistant 🤖
+              </Button>
+            </Link>
+            <Link href="/labour-contract-analysis">
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full border-blue-600 text-blue-600 hover:bg-blue-50"
+              >
+                Upload Contract to Check
+              </Button>
+            </Link>
+            <Link href="/legal-experts">
+              <Button
+                size="lg"
+                className="rounded-full bg-green-600 hover:bg-green-700 text-white"
+              >
+                Talk to Legal Experts 👨‍⚖️
+              </Button>
+            </Link>
+          </div>
+          
+          {/* Stats */}
+          <div className="mt-8 flex flex-wrap gap-8">
+            <div>
+              <p className="text-2xl font-bold text-blue-900">500+</p>
+              <p className="text-sm text-gray-600">Contracts Analyzed</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-blue-900">2,000+</p>
+              <p className="text-sm text-gray-600">Users Helped</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-blue-900">95%</p>
+              <p className="text-sm text-gray-600">Satisfaction Rate</p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Right Column */}
+        <div className="relative flex justify-center">
+          
+          {/* Avatar Card */}
+          <div className="relative bg-white rounded-2xl shadow-lg p-6">
+            <img
+              src={avatarImg}
+              alt="AI Assistant Avatar"
+              className="w-64 h-64 object-cover rounded-xl"
+            />
+
+            
+            {/* Online Tag */}
+            <span className="absolute top-4 right-4 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-medium">
+              Online 24/7
+            </span>
+          </div>
+          
+          {/* Ready to Help Badge */}
+          <div className="absolute bottom-0 -mb-4 bg-white border border-gray-200 rounded-full px-4 py-1 text-sm text-gray-700 shadow-sm">
+            ⭘ Ready to Help
           </div>
         </div>
       </div>
-
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Chat Interface */}
-        <div className="lg:col-span-2">
-          {sessionId ? (
-            <ChatInterface sessionId={sessionId} />
-          ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Initializing legal assistant...</p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Features Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Zap className="mr-2 h-5 w-5 text-accent" />
-                Features
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {features.map((feature, index) => (
-                <div key={index} className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="h-4 w-4 text-accent" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{feature.title}</p>
-                    <p className="text-xs text-muted-foreground">{feature.description}</p>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Legal Topics Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Book className="mr-2 h-5 w-5 text-primary" />
-                Legal Topics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {[
-                { id: "ipc", label: "Indian Penal Code" },
-                { id: "fundamental-rights", label: "Fundamental Rights" },
-                { id: "consumer-protection", label: "Consumer Protection" },
-                { id: "cyber-laws", label: "Cyber Laws" },
-                { id: "labor-laws", label: "Labor Laws" },
-                { id: "property-law", label: "Property Law" }
-              ].map((topic) => (
-                <Button
-                  key={topic.id}
-                  variant="ghost"
-                  className="w-full justify-start text-sm text-muted-foreground hover:text-foreground"
-                  data-testid={`topic-${topic.id}`}
-                >
-                  {topic.label}
-                </Button>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </main>
+    </div>
   );
 }

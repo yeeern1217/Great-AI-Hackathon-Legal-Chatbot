@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Scale, MessageCircle, ExternalLink, Menu, FileScan } from "lucide-react";
+import { Scale, MessageCircle, ExternalLink, Menu, FileScan, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -7,9 +7,11 @@ export default function Header() {
   const [location] = useLocation();
 
   const navItems = [
-    { path: "/", label: "Chat Assistant", icon: MessageCircle },
+    { path: "/", label: "Home", icon: Scale },
+    { path: "/chat-assistant", label: "Chat Assistant", icon: MessageCircle },
     { path: "/labour-contract-analysis", label: "Labour Contract Analysis", icon: FileScan },
-    { path: "/portals", label: "Gov Portals", icon: ExternalLink }
+    { path: "/portals", label: "Gov Portals", icon: ExternalLink },
+    { path: "/legal-experts", label: "Legal Experts", icon: UsersRound },
   ];
 
   const NavItems = ({ mobile = false }: { mobile?: boolean }) => (
