@@ -68,13 +68,20 @@ async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db
 
 @router.post("/api/transcribe")
 async def transcribe_endpoint(language: str = Form(...), audio: UploadFile = File(...)):
+    language_map = {
+        "en": "en-US",
+        "ms": "ms-MY",
+        "id": "id-ID"
+    }
+    aws_language_code = language_map.get(language, "en-US")
+
     file_path = os.path.join(UPLOAD_DIR, audio.filename)
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(audio.file, buffer)
         
-    transcript = transcribe_audio(file_path, language)
+    transcript_text = transcribe_audio(file_path, aws_language_code)
     os.remove(file_path) # Clean up the file
-    return {"transcript": transcript}
+    return {"transcript": transcript_text}
 
 @router.post("/api/analyze-labour-contract")
 async def analyze_labour_contract_endpoint(data: dict):
