@@ -20,7 +20,11 @@ function Router() {
       <Route path="/portals" component={Portals} />
       <Route path="/labour-contract-analysis" component={LabourContractAnalysis} />
       <Route path="/legal-experts" component={LegalExperts} />
-      <Route component={NotFound} />
+
+      {/* ✅ fallback route */}
+      <Route>
+        <NotFound />
+      </Route>
     </Switch>
   );
 }

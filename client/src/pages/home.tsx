@@ -33,7 +33,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/chat-assistant">
               <Button size="lg" className="rounded-full bg-blue-600 hover:bg-blue-700">
-                Chat with AI Assistant
+                Chat with AI Assistant 🤖
               </Button>
             </Link>
             <Link href="/labour-contract-analysis">
@@ -43,6 +43,14 @@ export default function Home() {
                 className="rounded-full border-blue-600 text-blue-600 hover:bg-blue-50"
               >
                 Upload Contract to Check
+              </Button>
+            </Link>
+            <Link href="/legal-experts">
+              <Button
+                size="lg"
+                className="rounded-full bg-green-600 hover:bg-green-700 text-white"
+              >
+                Talk to Legal Experts 👨‍⚖️
               </Button>
             </Link>
           </div>
