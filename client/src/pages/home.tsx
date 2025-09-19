@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import avatarImg from "@/assets/ai-legal-avatar.png";
+import avatarImg from "@/assets/ai-legal-avatar.jpg";
 
 export default function Home() {
   return (
