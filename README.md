@@ -8,6 +8,7 @@
    git clone https://github.com/yeeern1217/Great-AI-Hackathon-Legal-Chatbot.git
 2. Run the demo:
    ```bash
+   .\.venv\Scripts\Activate.ps1
    npm install
    uvicorn bedrock:app --reload
    npm run dev
