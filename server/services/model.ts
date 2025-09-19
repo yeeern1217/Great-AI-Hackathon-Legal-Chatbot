@@ -22,28 +22,36 @@ const genAI = new GoogleGenerativeAI(apiKey);
 import axios from "axios";
 export async function generateLegalAdvice(userQuestion: string, documentContext?: string): Promise<string> {
   try {
-    // Define the URL for the Bedrock service
-    const bedrockUrl = "http://127.0.0.1:8000/bedrock/invoke";
+    // Define the URL for the Bedrock RAG service
+    const bedrockUrl = "http://127.0.0.1:8000/bedrock/query";
 
     // Prepare the request parameters
     const params = new URLSearchParams();
-    params.append("text", userQuestion);
-    if (documentContext) {
-      params.append("document_context", documentContext);
-    }
+    // The documentContext can be passed as part of the user question for the RAG to consider.
+    const queryText = documentContext
+      ? `Based on the following document context, please answer the user's question.
+
+<document_context>
+${documentContext}
+</document_context>
+
+Question: ${userQuestion}`
+      : userQuestion;
+
+    params.append("text", queryText);
 
     // Make the request to the Bedrock service
     const response = await axios.get(bedrockUrl, { params });
 
-    // Check if the response contains the expected data
-    if (response.data && response.data.assistant) {
-      return response.data.assistant;
+    // Check if the response contains the expected data from the RAG service
+    if (response.data && response.data.response) {
+      return response.data.response;
     } else {
-      console.error("Invalid response from Bedrock service:", response.data);
+      console.error("Invalid response from Bedrock RAG service:", response.data);
       return "I apologize, but I received an invalid response from the legal analysis service. Please try again later.";
     }
   } catch (error) {
-    console.error("Error calling Bedrock service:", error);
+    console.error("Error calling Bedrock RAG service:", error);
 
     // Provide a more specific error message if the service is unavailable
     if (axios.isAxiosError(error) && error.code === 'ECONNREFUSED') {
@@ -120,54 +128,11 @@ If not English, reply in the same language when possible, but always include the
 // Labour Contract Visual Analysis
 // =================================
 export async function analyzeLabourContract(documentText: string): Promise<any> {
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-  const prompt = `
-    You are a specialized AI legal assistant for Malaysian labour contracts. Your task is to conduct a detailed analysis of the provided contract text and return a structured JSON output.
-
-    **Analysis Categories (Traffic Light System):**
-    *   **🔴 Red:** Critical, high-risk, or potentially unfair clauses under Malaysian law.
-    *   **🟡 Yellow:** Clauses that are ambiguous, unusual, or require caution and clarification.
-    *   **🟢 Green:** Standard, fair, and generally acceptable clauses.
-
-    **JSON Output Structure:**
-    You must return a single, valid JSON object with the following structure. Do not include any markdown formatting or other text outside the JSON object. Each clause object MUST have a "color" property with one of three string values: 'Red', 'Yellow', or 'Green'.
-    {
-      "summary": {
-        "criticalIssues": <count_of_red_clauses>,
-        "areasForCaution": <count_of_yellow_clauses>
-      },
-      "clauses": [
-        {
-          "title": "<A concise, descriptive title for the clause>",
-          "originalText": "<The exact, verbatim text of the clause from the document>",
-          "color": "'Red' or 'Yellow' or 'Green'",
-          "explanation": "<A simple, clear explanation of what the clause means>",
-          "whyItMatters": "<Explain the potential impact or risk for the user>",
-          "suggestion": "<Provide an actionable suggestion, e.g., 'Request clarification on...', 'Negotiate to change...', 'This is a standard clause.'>"
-        }
-      ]
-    }
-
-    **Instructions:**
-    1.  Thoroughly read the entire contract text.
-    2.  Identify all distinct clauses.
-    3.  For each clause, populate all fields in the JSON structure above, especially the "color" field.
-    4.  Calculate the summary counts accurately.
-    5.  Ensure the 'originalText' is an exact match to the source document to enable frontend highlighting.
-    6.  If the document is not a labour contract or is unanalyzable, return a JSON object with an "error" key: 
-    
-    Now, analyze the following labour contract:
-  `;
-
   try {
-    const result = await model.generateContent([prompt, documentText]);
-    const responseText = result.response.text();
+    const bedrockUrl = "http://127.0.0.1:8000/bedrock/analyze-contract";
+    const response = await axios.post(bedrockUrl, { contract_text: documentText });
 
-    // Clean the response to ensure it's a valid JSON string
-    const jsonString = responseText.replace(/```json|```/g, "").trim();
-    
-    const analysisResult = JSON.parse(jsonString);
+    const analysisResult = response.data;
 
     // Normalize color values and then calculate the summary
     if (analysisResult.clauses && Array.isArray(analysisResult.clauses)) {

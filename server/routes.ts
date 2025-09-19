@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertChatMessageSchema, insertChatSessionSchema } from "@shared/schema";
-import { generateLegalAdvice, analyzeDocument, analyzeLabourContract, analyzeLabourContractFile } from "./services/gemini";
+import { generateLegalAdvice, analyzeDocument, analyzeLabourContract, analyzeLabourContractFile } from "./services/model";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
