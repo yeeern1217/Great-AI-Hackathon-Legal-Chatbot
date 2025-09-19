@@ -44,8 +44,8 @@ Question: ${userQuestion}`
     const response = await axios.get(bedrockUrl, { params });
 
     // Check if the response contains the expected data from the RAG service
-    if (response.data && response.data.response) {
-      return response.data.response;
+    if (response.data && response.data.assistant_response) {
+      return response.data.assistant_response;
     } else {
       console.error("Invalid response from Bedrock RAG service:", response.data);
       return "I apologize, but I received an invalid response from the legal analysis service. Please try again later.";
