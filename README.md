@@ -9,7 +9,15 @@
 2. Run the demo:
    ```bash
    npm install
-   ```bash
+   uvicorn bedrock:app --reload
    npm run dev
 
-3. For error '\\test\\data\\05-versions-space.pdf' just manually create an empty file with exactly same path in the directory
+3. For error '\\test\\data\\05-versions-space.pdf' run below script:
+   ```bash
+   echo "%PDF-1.4
+   1 0 obj
+   <<>>
+   endobj
+   trailer
+   <<>>
+   %%EOF" > test/data/05-versions-space.pdf
