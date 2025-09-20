@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 import os
 import shutil
 import json
+import boto3
 
 from server.storage import get_db, create_chat_session, get_chat_session, get_chat_messages, add_chat_message, save_uploaded_file
 from shared.schema import InsertChatSession, InsertChatMessage, Expert
@@ -120,3 +121,34 @@ def get_legal_topics():
       { "id": 'osha', "name": 'Occupational Safety and Health Act 1994', "query": 'Explain the Occupational Safety and Health Act 1994' }
     ]
     return topics
+
+dynamodb = boto3.resource(
+    "dynamodb",
+    region_name="us-east-1",  # change if different
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
+)
+
+table = dynamodb.Table("experts")
+
+@router.get("/api/experts")
+def get_experts():
+    response = table.scan()
+    items = response.get("Items", [])
+
+    experts = []
+    for item in items:
+        experts.append({
+            "id": item.get("id"),
+            "name": item.get("name"),
+            "bio": item.get("bio"),
+            "specialization": item.get("specialization"),  # string
+            "title": item.get("title"),
+            "languages": item.get("languages", []),  # list
+            "experience": f"{item.get('experience', 0)} years",
+            "hourlyRate": item.get("hourlyRate"),
+            "gender": item.get("gender"),
+            "location": item.get("location")
+        })
+
+    return {"experts": experts}

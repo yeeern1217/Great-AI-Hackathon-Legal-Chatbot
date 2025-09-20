@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,112 +8,55 @@ interface Expert {
   id: string;
   name: string;
   title: string;
-  specialization: string[];
+  specialization: string; 
+  bio: string;
   location: string;
-  rating: number;
-  reviews: number;
   languages: string[];
   experience: string;
   hourlyRate: string;
-  availability: 'available' | 'busy' | 'unavailable';
-  image: string;
+  gender: string;
 }
 
 const LegalExperts = () => {
-//   const { t } = useLanguage();
+  const [experts, setExperts] = useState<Expert[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialization, setSelectedSpecialization] = useState('all');
+  const [loading, setLoading] = useState(true);
 
-  const experts: Expert[] = [
-    {
-      id: '1',
-      name: 'Puan Sarah Ahmad',
-      title: 'Senior Labor Law Advocate',
-      specialization: ['Employment Law', 'Contract Review', 'Industrial Relations'],
-      location: 'Kuala Lumpur',
-      rating: 4.9,
-      reviews: 127,
-      languages: ['English', 'Bahasa Malaysia'],
-      experience: '12 years',
-      hourlyRate: 'RM 350-450',
-      availability: 'available',
-      image: '/api/placeholder/120/120'
-    },
-    {
-      id: '2',
-      name: 'En. Ahmad Rahman',
-      title: 'Employment Law Specialist',
-      specialization: ['Wrongful Termination', 'Workplace Rights', 'Contract Disputes'],
-      location: 'Petaling Jaya',
-      rating: 4.8,
-      reviews: 89,
-      languages: ['English', 'Bahasa Malaysia', 'Mandarin'],
-      experience: '8 years',
-      hourlyRate: 'RM 280-350',
-      availability: 'available',
-      image: '/api/placeholder/120/120'
-    },
-    {
-      id: '3',
-      name: 'Ms. Priya Devi',
-      title: 'Corporate Employment Counsel',
-      specialization: ['HR Compliance', 'Policy Review', 'Employment Contracts'],
-      location: 'Shah Alam',
-      rating: 4.7,
-      reviews: 156,
-      languages: ['English', 'Tamil', 'Bahasa Malaysia'],
-      experience: '15 years',
-      hourlyRate: 'RM 400-500',
-      availability: 'busy',
-      image: '/api/placeholder/120/120'
-    },
-    {
-      id: '4',
-      name: 'En. Lim Wei Ming',
-      title: 'Industrial Relations Expert',
-      specialization: ['Union Relations', 'Collective Bargaining', 'Labor Disputes'],
-      location: 'Johor Bahru',
-      rating: 4.6,
-      reviews: 73,
-      languages: ['English', 'Mandarin', 'Bahasa Malaysia'],
-      experience: '10 years',
-      hourlyRate: 'RM 300-400',
-      availability: 'available',
-      image: '/api/placeholder/120/120'
-    }
-  ];
+  useEffect(() => {
+    fetch("/api/experts")
+      .then((res) => res.json())
+      .then((data) => {
+        setExperts(data.experts);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching experts:", err);
+        setLoading(false);
+      });
+  }, []);
 
-  const specializations = ['all', 'Employment Law', 'Contract Review', 'Wrongful Termination', 'HR Compliance', 'Industrial Relations'];
-
-  const filteredExperts = experts.filter(expert => {
-    const matchesSearch = expert.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         expert.specialization.some(spec => spec.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesSpecialization = selectedSpecialization === 'all' || 
-                                 expert.specialization.includes(selectedSpecialization);
+  const filteredExperts = experts.filter((expert) => {
+    const matchesSearch =
+      expert.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      expert.specialization.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSpecialization =
+      selectedSpecialization === 'all' ||
+      expert.specialization.toLowerCase() === selectedSpecialization.toLowerCase();
     return matchesSearch && matchesSpecialization;
   });
 
-  const getAvailabilityColor = (availability: string) => {
-    switch (availability) {
-      case 'available': return 'bg-success text-success-foreground';
-      case 'busy': return 'bg-warning text-warning-foreground';
-      case 'unavailable': return 'bg-muted text-muted-foreground';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
+  const uniqueSpecializations = Array.from(
+    new Set(experts.map((e) => e.specialization))
+  ).sort((a, b) => a.localeCompare(b));
 
-  const getAvailabilityText = (availability: string) => {
-    switch (availability) {
-      case 'available': return 'Available Now';
-      case 'busy': return 'Busy';
-      case 'unavailable': return 'Unavailable';
-      default: return 'Unknown';
-    }
-  };
+  if (loading) {
+    return <p className="text-center py-10">Loading experts...</p>;
+  }
 
   return (
     <div className="min-h-screen bg-background pt-20">
-      <div className="container px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
@@ -128,7 +71,7 @@ const LegalExperts = () => {
             </p>
           </div>
 
-          {/* Search and Filter */}
+          {/* Search & Filter */}
           <div className="grid md:grid-cols-4 gap-4 mb-8">
             <div className="md:col-span-2 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -140,26 +83,22 @@ const LegalExperts = () => {
                 className="w-full pl-10 pr-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
-            
-            <div className="relative">
+
+            <div className="md:col-span-2 relative">
               <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <select
                 value={selectedSpecialization}
                 onChange={(e) => setSelectedSpecialization(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary appearance-none"
               >
-                {specializations.map(spec => (
-                  <option key={spec} value={spec}>
-                    {spec === 'all' ? 'All Specializations' : spec}
+                <option value="all">All Specializations</option>
+                {uniqueSpecializations.map((specialization, index) => (
+                  <option key={index} value={specialization}>
+                    {specialization}
                   </option>
                 ))}
               </select>
             </div>
-
-            <Button variant="outline" className="w-full">
-              <Calendar className="h-4 w-4 mr-2" />
-              Book Consultation
-            </Button>
           </div>
 
           {/* Experts Grid */}
@@ -171,48 +110,27 @@ const LegalExperts = () => {
                     <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                       <Users className="h-8 w-8 text-muted-foreground" />
                     </div>
-                    
                     <div className="flex-1">
                       <div className="flex items-start justify-between">
                         <div>
                           <CardTitle className="text-lg">{expert.name}</CardTitle>
                           <p className="text-sm text-muted-foreground">{expert.title}</p>
                         </div>
-                        <Badge className={getAvailabilityColor(expert.availability)}>
-                          {getAvailabilityText(expert.availability)}
-                        </Badge>
                       </div>
-                      
-                      <div className="flex items-center gap-4 mt-2">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm font-medium">{expert.rating}</span>
-                          <span className="text-xs text-muted-foreground">({expert.reviews} reviews)</span>
-                        </div>
-                        
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <MapPin className="h-3 w-3" />
-                          {expert.location}
-                        </div>
+                      <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                        <MapPin className="h-3 w-3" />
+                        {expert.location}
                       </div>
                     </div>
                   </div>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  {/* Specializations */}
+                  <p className="text-sm">{expert.bio}</p>
                   <div>
-                    <h4 className="font-medium text-sm mb-2">Specializations</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {expert.specialization.map((spec, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {spec}
-                        </Badge>
-                      ))}
-                    </div>
+                    <h4 className="font-medium text-sm mb-2">Specialization</h4>
+                    <Badge variant="secondary">{expert.specialization}</Badge>
                   </div>
-
-                  {/* Languages & Experience */}
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="font-medium">Languages:</span>
@@ -223,79 +141,38 @@ const LegalExperts = () => {
                       <p className="text-muted-foreground">{expert.experience}</p>
                     </div>
                   </div>
-
-                  {/* Rate */}
                   <div className="text-sm">
                     <span className="font-medium">Consultation Rate:</span>
                     <p className="text-muted-foreground">{expert.hourlyRate}/hour</p>
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex gap-2 pt-2">
-                    <Button 
-                      className="flex-1" 
-                      disabled={expert.availability === 'unavailable'}
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="w-full bg-green-500 hover:bg-green-600 text-white"
+                  >
+                    <a
+                      href={`https://wa.me/60124203138?text=${encodeURIComponent(
+                        `Hello ${expert.name}, I found your profile on Our Website and would like to consult regarding ${expert.specialization}.`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Book Consultation
-                    </Button>
-                    
-                    <Button variant="outline" size="icon">
-                      <Phone className="h-4 w-4" />
-                    </Button>
-                    
-                    <Button variant="outline" size="icon">
-                      <Mail className="h-4 w-4" />
-                    </Button>
-                  </div>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 mr-2"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M20.52 3.48A11.85 11.85 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.12.55 4.2 1.6 6.04L0 24l6.2-1.6A11.93 11.93 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.2-1.24-6.2-3.48-8.52zM12 22c-1.92 0-3.8-.52-5.43-1.5l-.39-.23-3.68.95.98-3.58-.25-.39A9.96 9.96 0 0 1 2 12c0-5.52 4.48-10 10-10s10 4.48 10 10-4.48 10-10 10zm5.14-7.45c-.28-.14-1.65-.81-1.9-.9-.25-.1-.43-.14-.62.14-.18.27-.71.9-.87 1.08-.16.18-.32.2-.6.07-.28-.14-1.2-.44-2.28-1.41-.84-.75-1.41-1.67-1.57-1.95-.16-.27-.02-.42.12-.56.12-.12.28-.32.42-.48.14-.16.18-.27.28-.45.09-.18.05-.34-.02-.48-.07-.14-.62-1.5-.85-2.07-.22-.53-.45-.46-.62-.47h-.53c-.18 0-.48.07-.74.34-.25.27-.97.95-.97 2.3s.99 2.67 1.13 2.86c.14.18 1.96 2.98 4.76 4.18.67.29 1.19.46 1.6.59.67.21 1.27.18 1.75.11.54-.08 1.65-.68 1.88-1.34.23-.65.23-1.21.16-1.34-.07-.14-.25-.22-.53-.36z" />
+                      </svg>
+                      Chat on WhatsApp
+                    </a>
+                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
-
-          {filteredExperts.length === 0 && (
-            <Card className="mt-8">
-              <CardContent className="text-center py-16">
-                <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-semibold text-lg mb-2">No Experts Found</h3>
-                <p className="text-muted-foreground max-w-md mx-auto">
-                  Try adjusting your search criteria or browse all available legal experts.
-                </p>
-                <Button 
-                  variant="outline" 
-                  className="mt-4"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setSelectedSpecialization('all');
-                  }}
-                >
-                  Clear Filters
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Contact CTA */}
-          <Card className="mt-12 bg-primary/5 border-primary/20">
-            <CardContent className="text-center py-8">
-              <h2 className="font-heading text-2xl font-bold text-primary mb-4">
-                Need Emergency Legal Advice?
-              </h2>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                Our experts are available for urgent consultations. Get immediate help with critical employment law matters.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button variant="default" size="lg">
-                  <Phone className="h-4 w-4 mr-2" />
-                  Call Emergency Hotline
-                </Button>
-                <Button variant="outline" size="lg">
-                  <Mail className="h-4 w-4 mr-2" />
-                  Send Urgent Query
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>

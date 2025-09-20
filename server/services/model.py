@@ -32,13 +32,11 @@ def categorize_prompt(prompt: str):
         raise ValueError("MODEL_ID is not configured.")
 
     specializations = [
-        "Employment Contracts",
-        "Wages & Benefits",
-        "Working Hours & Leave",
-        "Termination & Dismissal",
-        "Workplace Rights & Safety",
-        "Unions & Collective Bargaining",
-        "Foreign Workers & Immigration"
+        "Employment & Labor Law",
+        "Industrial Relations & Unions",
+        "Employee Provident Fund (EPF)",
+        "Social Security & Insurance (SOCSO)",
+        "Workplace Safety & Health"
     ]
 
     try:
@@ -159,40 +157,25 @@ def generate_legal_advice(prompt: str, document_context: str = None):
     # Fallback or default behavior: direct model invocation
     if not MODEL_ID:
         raise ValueError("MODEL_ID is not configured.")
-
+    
     system_prompt = (
         "You are a Malaysian AI legal assistant specializing in employment and labor law. "
-        "Your role is to help users understand their rights and obligations under the Employment Act 1955 and other relevant Malaysian regulations.\n\n"
-        "Guidelines:\n"
-        "- Answer in clear, simple sentences so that non-lawyers can understand.\n"
-        "- If the user asks in Malay, reply in Malay. If in English, reply in English.\n"
-        "- Provide short, structured answers. Use bullet points or numbered steps when possible.\n"
-        "- Always focus on employment and labor law (e.g., wages, working hours, termination, leave, contracts, discrimination, unions).\n"
-        "- If the question is outside this domain, politely decline and say it is not within employment law.\n"
-        "- If the law does not specify or you are uncertain, say so clearly instead of guessing.\n"
-        "- When possible, mention the relevant section of the Employment Act or other law.\n"
-        "- Do not provide personal opinions, only legal information and explanations."
+        "Your role is to answer questions from Malaysian citizens about their rights and obligations under employment regulations. "
+        "Use clear and simple sentences. "
+        "If the question is outside this domain, politely decline stating that it is not within your area of knowledge. "
+        "Provide only legal information and explanations, not personal opinions, provide legal references where applicable."
     )
-    
+
     full_prompt = f"{system_prompt}\n\nUser Query: {query_text}"
     if document_context:
         full_prompt = f"{system_prompt}\n\nDocument Context:\n{document_context}\n\nUser Query:\n{query_text}"
 
-    formatted_prompt = f"""
-    <|begin_of_text|>
-    <|start_header_id|>system<|end_header_id|>
-    {system_prompt}
-    <|eot_id|>
-    <|start_header_id|>user<|end_header_id|>
-    {query_text}
-    <|eot_id|>
-    <|start_header_id|>assistant<|end_header_id|>
-    """
-
     request_payload = {
-        "prompt": formatted_prompt,
-        "max_gen_len": 2048,
-        "temperature": 0.2
+        "prompt": full_prompt,
+        "max_gen_len": 512,
+        "temperature": 0.1,
+        "top-p": 0.8,
+        "top-k": 10
     }
 
     response = bedrock_client.invoke_model(
@@ -205,7 +188,6 @@ def generate_legal_advice(prompt: str, document_context: str = None):
     response_body = json.loads(response['body'].read().decode('utf-8'))
     answer = response_body.get("generation", "Sorry, I could not generate a response.")
 
-    # Translate back if needed
     if detected_lang == "ms":
         answer = GoogleTranslator(source="en", target="ms").translate(answer)
         logger.info("Translated English response back to Malay.")
