@@ -177,7 +177,7 @@ def analyze_labour_contract(document_text: str):
             retrieval_response = bedrock_agent_client.retrieve(
                 knowledgeBaseId=KNOWLEDGE_BASE_ID,
                 retrievalQuery={'text': document_text},
-                retrievalConfiguration={'vectorSearchConfiguration': {'numberOfResults': 5}}
+                retrievalConfiguration={'vectorSearchConfiguration': {'numberOfResults': 20}} # Increased to 20
             )
             retrieved_chunks = [result['content']['text'] for result in retrieval_response.get('retrievalResults', [])]
             if retrieved_chunks:
