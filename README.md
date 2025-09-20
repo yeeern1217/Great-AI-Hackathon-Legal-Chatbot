@@ -10,7 +10,7 @@
    ```bash
    .\.venv\Scripts\Activate.ps1
    npm install
-   uvicorn bedrock:app --reload
+uvicorn server.main:app --reload
    npm run dev
 
 3. For error '\\test\\data\\05-versions-space.pdf' run below script:
