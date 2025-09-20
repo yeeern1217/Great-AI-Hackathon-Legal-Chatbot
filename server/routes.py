@@ -3,9 +3,7 @@ from sqlalchemy.orm import Session
 import os
 import shutil
 import json
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from dynamodb_mockdata import generate_mock_employment_item
+from .dynamodb_mockdata import generate_mock_employment_item
 from faker import Faker
 
 from server.storage import get_db, create_chat_session, get_chat_session, get_chat_messages, add_chat_message, save_uploaded_file
