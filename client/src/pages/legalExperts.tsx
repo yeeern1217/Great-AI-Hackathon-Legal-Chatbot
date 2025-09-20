@@ -46,13 +46,17 @@ const LegalExperts = () => {
     return matchesSearch && matchesSpecialization;
   });
 
+  const uniqueSpecializations = Array.from(
+    new Set(experts.map((e) => e.specialization))
+  ).sort((a, b) => a.localeCompare(b));
+
   if (loading) {
     return <p className="text-center py-10">Loading experts...</p>;
   }
 
   return (
     <div className="min-h-screen bg-background pt-20">
-      <div className="container px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
@@ -80,7 +84,7 @@ const LegalExperts = () => {
               />
             </div>
 
-            <div className="relative">
+            <div className="md:col-span-2 relative">
               <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <select
                 value={selectedSpecialization}
@@ -88,18 +92,13 @@ const LegalExperts = () => {
                 className="w-full pl-10 pr-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary appearance-none"
               >
                 <option value="all">All Specializations</option>
-                {experts.map((e) => (
-                  <option key={e.id} value={e.specialization}>
-                    {e.specialization}
+                {uniqueSpecializations.map((specialization, index) => (
+                  <option key={index} value={specialization}>
+                    {specialization}
                   </option>
                 ))}
               </select>
             </div>
-
-            <Button variant="outline" className="w-full">
-              <Calendar className="h-4 w-4 mr-2" />
-              Book Consultation
-            </Button>
           </div>
 
           {/* Experts Grid */}
@@ -146,6 +145,30 @@ const LegalExperts = () => {
                     <span className="font-medium">Consultation Rate:</span>
                     <p className="text-muted-foreground">{expert.hourlyRate}/hour</p>
                   </div>
+
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="w-full bg-green-500 hover:bg-green-600 text-white"
+                  >
+                    <a
+                      href={`https://wa.me/60124203138?text=${encodeURIComponent(
+                        `Hello ${expert.name}, I found your profile on Our Website and would like to consult regarding ${expert.specialization}.`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 mr-2"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M20.52 3.48A11.85 11.85 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.12.55 4.2 1.6 6.04L0 24l6.2-1.6A11.93 11.93 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.2-1.24-6.2-3.48-8.52zM12 22c-1.92 0-3.8-.52-5.43-1.5l-.39-.23-3.68.95.98-3.58-.25-.39A9.96 9.96 0 0 1 2 12c0-5.52 4.48-10 10-10s10 4.48 10 10-4.48 10-10 10zm5.14-7.45c-.28-.14-1.65-.81-1.9-.9-.25-.1-.43-.14-.62.14-.18.27-.71.9-.87 1.08-.16.18-.32.2-.6.07-.28-.14-1.2-.44-2.28-1.41-.84-.75-1.41-1.67-1.57-1.95-.16-.27-.02-.42.12-.56.12-.12.28-.32.42-.48.14-.16.18-.27.28-.45.09-.18.05-.34-.02-.48-.07-.14-.62-1.5-.85-2.07-.22-.53-.45-.46-.62-.47h-.53c-.18 0-.48.07-.74.34-.25.27-.97.95-.97 2.3s.99 2.67 1.13 2.86c.14.18 1.96 2.98 4.76 4.18.67.29 1.19.46 1.6.59.67.21 1.27.18 1.75.11.54-.08 1.65-.68 1.88-1.34.23-.65.23-1.21.16-1.34-.07-.14-.25-.22-.53-.36z" />
+                      </svg>
+                      Chat on WhatsApp
+                    </a>
+                  </Button>
                 </CardContent>
               </Card>
             ))}
