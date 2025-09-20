@@ -160,9 +160,17 @@ const ClauseCard = ({ clause, index }: { clause: Clause; index: number }) => {
 const DashboardView = ({ result }: { result: AnalysisResult }) => {
   const [filter, setFilter] = useState<'All' | 'Red' | 'Yellow' | 'Green'>('All');
 
-  const greenClauses = result.clauses.length - result.summary.criticalIssues - result.summary.areasForCaution;
+  const { redClauses, yellowClauses, greenClauses } = useMemo(() => {
+    return result.clauses.reduce((acc, clause) => {
+      if (clause.color === 'Red') acc.redClauses++;
+      if (clause.color === 'Yellow') acc.yellowClauses++;
+      if (clause.color === 'Green') acc.greenClauses++;
+      return acc;
+    }, { redClauses: 0, yellowClauses: 0, greenClauses: 0 });
+  }, [result.clauses]);
+
   const totalClauses = result.clauses.length;
-  const healthScore = totalClauses > 0 ? Math.round(((totalClauses - result.summary.criticalIssues - result.summary.areasForCaution * 0.5) / totalClauses) * 100) : 100;
+  const healthScore = totalClauses > 0 ? Math.round(((totalClauses - redClauses - yellowClauses * 0.5) / totalClauses) * 100) : 100;
 
   const chartConfig = {
     critical: { label: "Critical", color: "#dc2626" }, // red-600
@@ -171,8 +179,8 @@ const DashboardView = ({ result }: { result: AnalysisResult }) => {
   }
 
   const chartData = [
-    { name: 'Critical', value: result.summary.criticalIssues, fill: chartConfig.critical.color },
-    { name: 'Caution', value: result.summary.areasForCaution, fill: chartConfig.caution.color },
+    { name: 'Critical', value: redClauses, fill: chartConfig.critical.color },
+    { name: 'Caution', value: yellowClauses, fill: chartConfig.caution.color },
     { name: 'Standard', value: greenClauses, fill: chartConfig.standard.color },
   ];
 
@@ -200,7 +208,7 @@ const DashboardView = ({ result }: { result: AnalysisResult }) => {
             <ShieldAlert className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{result.summary.criticalIssues}</div>
+            <div className="text-2xl font-bold text-red-600">{redClauses}</div>
             <p className="text-xs text-muted-foreground">High-risk clauses found</p>
           </CardContent>
         </Card>
@@ -210,7 +218,7 @@ const DashboardView = ({ result }: { result: AnalysisResult }) => {
             <Shield className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{result.summary.areasForCaution}</div>
+            <div className="text-2xl font-bold text-yellow-600">{yellowClauses}</div>
             <p className="text-xs text-muted-foreground">Ambiguous clauses found</p>
           </CardContent>
         </Card>
