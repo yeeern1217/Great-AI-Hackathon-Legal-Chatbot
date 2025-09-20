@@ -1,4 +1,4 @@
-#!C:\UM\Comp\GreatAI\Great-AI-Hackathon-Legal-Chatbot\server\venv\Scripts\python.exe
+#!C:\Users\chengy57\Documents\learn\GreatAI\Ai-LegalAdvisor\server\venv\Scripts\python.exe
 
 import sys
 import json

@@ -233,16 +233,27 @@ Your response MUST be a single, valid JSON object and nothing else, following th
 
     try:
         start_index = generated_text.find('{')
-        if start_index == -1:
-            raise json.JSONDecodeError("No JSON object start found", generated_text, 0)
-        decoder = json.JSONDecoder()
-        obj, end = decoder.raw_decode(generated_text[start_index:])
+        end_index = generated_text.rfind('}') + 1
+        if start_index == -1 or end_index == 0:
+            raise json.JSONDecodeError("No JSON object found", generated_text, 0)
+
+        json_string = generated_text[start_index:end_index]
+        obj = json.loads(json_string)
+
+        # Recalculate summary to ensure data integrity
+        if 'clauses' in obj and isinstance(obj['clauses'], list):
+            red_count = sum(1 for clause in obj['clauses'] if clause.get('color') == 'Red')
+            yellow_count = sum(1 for clause in obj['clauses'] if clause.get('color') == 'Yellow')
+            obj['summary'] = {
+                'criticalIssues': red_count,
+                'areasForCaution': yellow_count
+            }
+
         obj['documentText'] = document_text  # Add document text to the response
         return obj  # Return as a dictionary
     except json.JSONDecodeError:
         logger.error(f"Failed to parse JSON from model output: {generated_text}")
         return {"error": "Failed to parse model output."}
-
 
 def analyze_labour_contract_file(file_path: str, mime_type: str):
     """
