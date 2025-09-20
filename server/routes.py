@@ -5,9 +5,10 @@ import shutil
 import json
 
 from server.storage import get_db, create_chat_session, get_chat_session, get_chat_messages, add_chat_message, save_uploaded_file
-from shared.schema import InsertChatSession, InsertChatMessage
+from shared.schema import InsertChatSession, InsertChatMessage, Expert
 from server.services.model import generate_legal_advice, analyze_document, analyze_labour_contract, analyze_labour_contract_file
 from server.services.transcribe import transcribe_audio
+from server.services.experts import get_expert_recommendations
 
 router = APIRouter()
 
@@ -100,6 +101,14 @@ async def analyze_labour_contract_file_endpoint(file: UploadFile = File(...)):
     analysis_result = analyze_labour_contract_file(file_path, file.content_type)
     os.remove(file_path) # Clean up the file
     return analysis_result
+
+@router.post("/api/experts")
+async def experts_endpoint(data: dict):
+    prompt = data.get("prompt")
+    if not prompt:
+        raise HTTPException(status_code=400, detail="No prompt provided")
+    experts = get_expert_recommendations(prompt)
+    return {"experts": experts}
 
 @router.get("/api/legal-topics")
 def get_legal_topics():

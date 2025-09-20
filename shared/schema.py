@@ -23,3 +23,10 @@ class InsertChatMessage(BaseModel):
     role: Literal["user", "assistant"]
     content: str
     documentContext: Optional[str] = None
+
+class Expert(BaseModel):
+    id: str
+    name: str
+    specialization: str
+    imageUrl: Optional[str] = None
+    keywords: list[str] = []

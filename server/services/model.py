@@ -1,6 +1,7 @@
 import boto3
 import os
 import json
+import re
 import logging
 from dotenv import load_dotenv
 from botocore.exceptions import BotoCoreError, ClientError
@@ -25,6 +26,71 @@ try:
 except (BotoCoreError, ClientError) as e:
     logger.error(f"Failed to initialize AWS clients: {e}")
     raise
+
+def categorize_prompt(prompt: str):
+    if not MODEL_ID:
+        raise ValueError("MODEL_ID is not configured.")
+
+    specializations = [
+        "Employment Contracts",
+        "Wages & Benefits",
+        "Working Hours & Leave",
+        "Termination & Dismissal",
+        "Workplace Rights & Safety",
+        "Unions & Collective Bargaining",
+        "Foreign Workers & Immigration"
+    ]
+
+    try:
+        system_prompt = f"""You are an expert classifier for legal queries related to Malaysian labor law. Your task is to categorize the user's query into one or more of the following specializations. Respond with a JSON array of the matching specialization strings. If no specialization matches, respond with an empty array.
+
+Available Specializations:
+{json.dumps(specializations, indent=2)}
+
+User's Query:
+{prompt}
+
+Matching Specializations (JSON Array):"""
+
+        request_payload = {
+            "prompt": system_prompt,
+            "max_gen_len": 512,
+            "temperature": 0.0
+        }
+
+        response = bedrock_client.invoke_model(
+            modelId=MODEL_ID,
+            contentType="application/json",
+            accept="application/json",
+            body=json.dumps(request_payload)
+        )
+
+        response_body = json.loads(response['body'].read().decode('utf-8'))
+        generated_text = response_body.get("generation", "[]").strip()
+        logger.debug(f"\n[DEBUG] Raw generated text from model:\n---\n{generated_text}\n---")
+
+        try:
+            match = re.search(r'\[.*?\]', generated_text, re.DOTALL)
+            if match:
+                json_string = match.group(0)
+                logger.debug(f"[DEBUG] Extracted JSON string: {json_string}")
+                matched_specializations = json.loads(json_string)
+                logger.debug(f"[DEBUG] Parsed specializations: {matched_specializations}")
+                return matched_specializations
+            else:
+                logger.debug("[DEBUG] No JSON array found in the model output.")
+                return []
+        except json.JSONDecodeError:
+            logger.error(f"Failed to parse JSON from model output: {generated_text}", exc_info=True)
+            return []
+
+    except ClientError as e:
+        logger.error(f"AWS ClientError: {e}", exc_info=True)
+        # Depending on desired error handling, you might return [] or raise
+        return []
+    except Exception as e:
+        logger.error(f"Unexpected error in categorization: {e}", exc_info=True)
+        return []
 
 def generate_legal_advice(prompt: str, document_context: str = None):
     """

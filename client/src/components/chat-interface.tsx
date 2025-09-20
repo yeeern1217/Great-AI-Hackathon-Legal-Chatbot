@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 import TypingIndicator from "./typing-indicator";
 import VoiceInput from "./voice-input";
 import FileUpload from "./file-upload";
+import RecommendExpert from "./recommend-expert";
 import { Bot, User, Send, Trash2, Download } from "lucide-react";
 import type { ChatMessage } from "@shared/schema";
 
@@ -104,6 +105,8 @@ export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const lastAssistantMessage = messages.filter(m => m.role === 'assistant').pop();
 
   return (
     <Card className="overflow-hidden">
@@ -228,7 +231,7 @@ export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
           </div>
 
           {/* Quick Actions */}
-          <div className="flex flex-wrap gap-2 mt-3">
+          <div className="flex flex-wrap items-center gap-2 mt-3">
             {quickActions.map((action) => (
               <Badge
                 key={action.id}
@@ -240,6 +243,7 @@ export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
                 {action.label}
               </Badge>
             ))}
+            {lastAssistantMessage && <RecommendExpert prompt={lastAssistantMessage.content} />}
           </div>
         </div>
       </CardContent>
