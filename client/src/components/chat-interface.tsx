@@ -214,11 +214,7 @@ export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="en">🇬🇧 EN</SelectItem>
-                <SelectItem value="hi">🇮🇳 हिं</SelectItem>
-                <SelectItem value="bn">🇮🇳 বাং</SelectItem>
-                <SelectItem value="te">🇮🇳 తె</SelectItem>
-                <SelectItem value="ta">🇮🇳 த</SelectItem>
-                <SelectItem value="mr">🇮🇳 मर</SelectItem>
+                <SelectItem value="ms">🇲🇾 MS</SelectItem>
               </SelectContent>
             </Select>
 

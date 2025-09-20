@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+pydantic
+sqlalchemy
+python-multipart
+boto3
+google-generativeai
+python-dotenv
+aiofiles
+PyPDF2
+deep-translator
