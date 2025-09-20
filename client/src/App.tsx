@@ -18,11 +18,21 @@ import LegalExperts from "@/pages/legalExperts";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/chat-assistant" component={ChatAssistant} />
-      <Route path="/portals" component={Portals} />
-      <Route path="/labour-contract-analysis" component={LabourContractAnalysis} />
-      <Route path="/legal-experts" component={LegalExperts} />
+      <Route path="/">
+        <Home />
+      </Route>
+      <Route path="/chat-assistant">
+        <ChatAssistant />
+      </Route>
+      <Route path="/portals">
+        <Portals />
+      </Route>
+      <Route path="/labour-contract-analysis">
+        <LabourContractAnalysis />
+      </Route>
+      <Route path="/legal-experts">
+        <LegalExperts />
+      </Route>
 
       {/* ✅ fallback route */}
       <Route>
