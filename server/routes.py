@@ -3,6 +3,10 @@ from sqlalchemy.orm import Session
 import os
 import shutil
 import json
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from dynamodb_mockdata import generate_mock_employment_item
+from faker import Faker
 
 from server.storage import get_db, create_chat_session, get_chat_session, get_chat_messages, add_chat_message, save_uploaded_file
 from shared.schema import InsertChatSession, InsertChatMessage
@@ -10,6 +14,8 @@ from server.services.model import generate_legal_advice, analyze_document, analy
 from server.services.transcribe import transcribe_audio
 
 router = APIRouter()
+fake = Faker()
+
 
 UPLOAD_DIR = "uploads"
 if not os.path.exists(UPLOAD_DIR):
@@ -112,3 +118,28 @@ def get_legal_topics():
       { "id": 'property-law', "name": 'Property Law', "query": 'What are property laws in India?' }
     ]
     return topics
+
+@router.get("/api/dashboard-data")
+def get_dashboard_data():
+    """
+    Generates and returns a list of mock employment data for the dashboard.
+    """
+    num_records = 50
+    mock_data = []
+    for _ in range(num_records):
+        user_id = fake.uuid4()
+        item = generate_mock_employment_item(user_id)
+        
+        # Convert Decimal to float for JSON serialization
+        if 'analysisResult' in item and 'keyMetrics' in item['analysisResult']:
+            key_metrics = item['analysisResult']['keyMetrics']
+            if 'salary' in key_metrics:
+                key_metrics['salary'] = float(key_metrics['salary'])
+            if 'workingHours' in key_metrics:
+                key_metrics['workingHours'] = float(key_metrics['workingHours'])
+            if 'annualLeave' in key_metrics:
+                key_metrics['annualLeave'] = float(key_metrics['annualLeave'])
+                
+        mock_data.append(item)
+        
+    return mock_data

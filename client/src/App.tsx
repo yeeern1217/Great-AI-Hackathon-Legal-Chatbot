@@ -11,6 +11,7 @@ import Portals from "@/pages/portals";
 import NotFound from "@/pages/not-found";
 import LabourContractAnalysis from "@/pages/labour-contract-analysis";
 import LegalExperts from "@/pages/legalExperts";
+import DashboardPage from "@/pages/dashboard";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/portals" component={Portals} />
       <Route path="/labour-contract-analysis" component={LabourContractAnalysis} />
       <Route path="/legal-experts" component={LegalExperts} />
+      <Route path="/dashboard" component={DashboardPage} />
 
       {/* ✅ fallback route */}
       <Route>
