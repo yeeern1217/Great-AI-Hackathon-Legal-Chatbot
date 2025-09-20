@@ -7,7 +7,6 @@ export default function Header() {
   const [location] = useLocation();
 
   const navItems = [
-    { path: "/", label: "Home", icon: Scale },
     { path: "/chat-assistant", label: "Chat Assistant", icon: MessageCircle },
     { path: "/labour-contract-analysis", label: "Labour Contract Analysis", icon: FileScan },
     { path: "/portals", label: "Gov Portals", icon: ExternalLink },
@@ -15,52 +14,61 @@ export default function Header() {
   ];
 
   const NavItems = ({ mobile = false }: { mobile?: boolean }) => (
-    <div className={mobile ? "flex flex-col space-y-4" : "hidden md:flex space-x-6"}>
+    <div className={mobile ? "flex flex-col space-y-4" : "hidden md:flex items-center space-x-1"}>
       {navItems.map((item) => {
         const isActive = location === item.path;
         return (
-          <Link key={item.path} href={item.path}>
-            <Button
-              variant="ghost"
-              className={`${
-                isActive 
-                  ? "text-primary border-b-2 border-primary font-medium rounded-none" 
-                  : "text-muted-foreground hover:text-foreground"
-              } transition-colors px-4 py-2`}
-              data-testid={`nav-${item.path.replace("/", "")}`}>
+          <Button
+            key={item.path}
+            variant="ghost"
+            className={`${
+              isActive
+                ? "text-foreground font-medium"
+                : "text-foreground/80"
+            } hover:text-foreground hover:bg-white/10 dark:hover:bg-white/5 rounded-full px-3 py-1.5 text-sm transition-all duration-200 hover:scale-105`}
+            asChild
+            data-testid={`nav-${item.path.replace("/", "")}`}
+          >
+            <Link href={item.path}>
               <item.icon className="mr-2 h-4 w-4" />
               {item.label}
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         );
       })}
     </div>
   );
 
   return (
-    <header className="border-b border-border bg-card shadow-sm sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <nav className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-6xl px-4">
+      <div className="relative backdrop-blur-xl bg-white/5 dark:bg-black/20 rounded-full shadow-2xl shadow-black/5 dark:shadow-white/5">
+        <div className="flex items-center justify-between h-12 px-4">
+          {/* Logo */}
           <Link href="/">
-            <div className="flex items-center space-x-2 cursor-pointer" data-testid="logo">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <Scale className="text-primary-foreground h-4 w-4" />
+            <div className="flex items-center space-x-2 group cursor-pointer" data-testid="logo">
+              <div className="relative">
+                <div className="h-6 w-6 flex items-center justify-center text-primary">
+                  <Scale className="h-5 w-5" />
+                </div>
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
-              <h1 className="text-xl font-bold text-foreground font-logo">
+              <span className="text-base font-semibold text-foreground font-logo">
                 SembangLaw!<span className="text-primary"></span>
-              </h1>
+              </span>
             </div>
           </Link>
 
+          {/* Center Menu */}
           <NavItems />
 
+          {/* Mobile Menu */}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden" data-testid="mobile-menu">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right">
+            <SheetContent side="right" className="backdrop-blur-xl bg-white/80 dark:bg-black/80">
               <div className="mt-6">
                 <NavItems mobile />
               </div>
@@ -68,6 +76,6 @@ export default function Header() {
           </Sheet>
         </div>
       </div>
-    </header>
+    </nav>
   );
 }
