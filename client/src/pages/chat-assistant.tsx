@@ -20,7 +20,6 @@ export default function Home() {
         id: newSessionId,
         title: "Legal Consultation"
       });
-      // The backend will return the created session, which might have a different ID
       // or additional data. For now, we'll use the ID we sent.
       const session = await response.json() as Promise<ChatSession>;
       return { ...session, id: newSessionId };
