@@ -46,7 +46,9 @@ export default function Header() {
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <Scale className="text-primary-foreground h-4 w-4" />
               </div>
-              <h1 className="text-xl font-bold text-foreground">LegalAdvisor AI</h1>
+              <h1 className="text-xl font-bold text-foreground font-logo">
+                SembangLaw!<span className="text-primary"></span>
+              </h1>
             </div>
           </Link>
 

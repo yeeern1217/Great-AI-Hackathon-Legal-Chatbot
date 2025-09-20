@@ -55,10 +55,10 @@ export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
 
   // Quick action queries
   const quickActions = [
-    { id: "consumer-rights", label: "Consumer Rights", query: "What are my consumer rights in India?" },
-    { id: "cyber-crime", label: "Cyber Crime", query: "How do I report cyber crime in India?" },
-    { id: "property-law", label: "Property Law", query: "What are the basics of property law in India?" },
-    { id: "family-law", label: "Family Law", query: "Tell me about family law in India" }
+    { id: "employment-act", label: "Employment Act", query: "What are the key provisions of the Employment Act 1955?" },
+    { id: "unfair-dismissal", label: "Unfair Dismissal", query: "What constitutes unfair dismissal in Malaysia?" },
+    { id: "epf-socso", label: "EPF & SOCSO", query: "Explain EPF and SOCSO contributions." },
+    { id: "minimum-wage", label: "Minimum Wage", query: "What is the current minimum wage in Malaysia?" }
   ];
 
   const handleSendMessage = () => {
@@ -115,8 +115,8 @@ export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
               <Bot className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">Legal Assistant</h3>
-              <p className="text-sm text-muted-foreground">Powered by Gemini AI</p>
+              <h3 className="font-semibold text-foreground">Malaysia Legal Law Assistant</h3>
+              <p className="text-sm text-muted-foreground">Powered by AWS Bedrock</p>
             </div>
           </div>
           <div className="flex space-x-2">
@@ -144,12 +144,12 @@ export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
                 <Bot className="h-4 w-4 text-primary-foreground" />
               </div>
               <div className="bg-muted/50 rounded-2xl rounded-tl-sm p-4 max-w-md">
-                <p className="text-sm text-foreground mb-2">Hello! I'm your AI legal assistant for Indian laws. I can help you understand:</p>
+                <p className="text-sm text-foreground mb-2">Hello! I'm your AI legal assistant for Malaysian labour laws. I can help you understand:</p>
                 <ul className="text-sm text-muted-foreground space-y-1 mb-3">
-                  <li>• Indian Penal Code basics</li>
-                  <li>• Fundamental rights and duties</li>
-                  <li>• Consumer and cyber laws</li>
-                  <li>• Property and family law</li>
+                  <li>• Employment Act 1955</li>
+                  <li>• Industrial Relations Act 1967</li>
+                  <li>• EPF and SOCSO</li>
+                  <li>• Your rights as an employee</li>
                 </ul>
                 <p className="text-xs text-muted-foreground italic">
                   Disclaimer: I provide general legal information only. For specific legal advice, consult a qualified advocate.
@@ -198,7 +198,7 @@ export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask about Indian laws, consumer rights, legal procedures..."
+                placeholder="Ask about Malaysian labour laws, employment rights, legal procedures..."
                 className="resize-none pr-16 min-h-[44px]"
                 maxLength={500}
                 data-testid="message-input"

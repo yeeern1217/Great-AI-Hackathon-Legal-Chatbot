@@ -39,12 +39,11 @@ export default function Home() {
   }, [sessionId]);
 
   const legalTopics = [
-    "IPC Basics",
-    "Consumer Rights", 
-    "Cyber Laws",
-    "Property Law",
-    "Family Law",
-    "Labor Rights"
+    "Employment Act 1955",
+    "Industrial Relations Act 1967",
+    "EPF Act 1991",
+    "SOCSO Act 1969",
+    "OSHA 1994",
   ];
 
   const features = [
@@ -61,7 +60,7 @@ export default function Home() {
     {
       icon: Languages,
       title: "Multi-language support",
-      description: "Hindi, Bengali, Telugu, Tamil, and more"
+      description: "Supports English and Malay"
     },
     {
       icon: Shield,
@@ -75,9 +74,9 @@ export default function Home() {
       {/* Hero Section */}
       <div className="gradient-bg rounded-2xl p-8 text-white mb-8">
         <div className="max-w-3xl">
-          <h2 className="text-3xl font-bold mb-4">AI-Powered Legal Assistant for Indian Laws</h2>
+          <h2 className="text-3xl font-bold mb-4">AI-Powered Legal Assistant for Malaysian Labour Laws</h2>
           <p className="text-lg opacity-90 mb-6">
-            Get instant information about Indian legal concepts, your rights, and basic legal procedures. 
+            Get instant information about Malaysian legal concepts, your rights, and basic legal procedures. 
             Upload documents, speak in your language, and get clear explanations.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -140,12 +139,11 @@ export default function Home() {
             </CardHeader>
             <CardContent className="space-y-2">
               {[
-                { id: "ipc", label: "Indian Penal Code" },
-                { id: "fundamental-rights", label: "Fundamental Rights" },
-                { id: "consumer-protection", label: "Consumer Protection" },
-                { id: "cyber-laws", label: "Cyber Laws" },
-                { id: "labor-laws", label: "Labor Laws" },
-                { id: "property-law", label: "Property Law" }
+                { id: "employment-act", label: "Employment Act 1955" },
+                { id: "industrial-relations", label: "Industrial Relations Act 1967" },
+                { id: "epf-act", label: "EPF Act 1991" },
+                { id: "socso-act", label: "SOCSO Act 1969" },
+                { id: "osha", label: "OSHA 1994" }
               ].map((topic) => (
                 <Button
                   key={topic.id}

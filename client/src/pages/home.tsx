@@ -26,7 +26,7 @@ export default function Home() {
           {/* Description */}
           <p className="text-lg text-gray-700 max-w-lg">
             Get instant help with employment contracts and labor law questions.  
-            Our AI understands the Malaysian Employment Act and helps protect your rights.
+            Our AI understands Malaysian labor laws and helps protect your rights.
           </p>
           
           {/* CTA Buttons */}

@@ -78,6 +78,11 @@
   }
 }
 
+.font-logo {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+}
+
 /* Custom animations */
 @keyframes fadeIn {
   from { 

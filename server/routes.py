@@ -104,11 +104,10 @@ async def analyze_labour_contract_file_endpoint(file: UploadFile = File(...)):
 @router.get("/api/legal-topics")
 def get_legal_topics():
     topics = [
-      { "id": 'ipc', "name": 'Indian Penal Code', "query": 'Explain the Indian Penal Code basics' },
-      { "id": 'fundamental-rights', "name": 'Fundamental Rights', "query": 'What are fundamental rights in Indian Constitution?' },
-      { "id": 'consumer-protection', "name": 'Consumer Protection', "query": 'Tell me about Consumer Protection Act 2019' },
-      { "id": 'cyber-laws', "name": 'Cyber Laws', "query": 'What are the cyber laws in India?' },
-      { "id": 'labor-laws', "name": 'Labor Laws', "query": 'Explain labor laws in India' },
-      { "id": 'property-law', "name": 'Property Law', "query": 'What are property laws in India?' }
+      { "id": 'employment-act', "name": 'Employment Act 1955', "query": 'Explain the basics of the Employment Act 1955' },
+      { "id": 'industrial-relations', "name": 'Industrial Relations Act 1967', "query": 'What are the key provisions of the Industrial Relations Act 1967?' },
+      { "id": 'epf-act', "name": 'Employees Provident Fund Act 1991', "query": 'Tell me about the Employees Provident Fund Act 1991' },
+      { "id": 'socso-act', "name": 'Employees Social Security Act 1969', "query": 'What is the Employees Social Security Act 1969?' },
+      { "id": 'osha', "name": 'Occupational Safety and Health Act 1994', "query": 'Explain the Occupational Safety and Health Act 1994' }
     ]
     return topics
