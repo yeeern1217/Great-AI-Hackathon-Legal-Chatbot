@@ -1,20 +1,16 @@
 name: Push-to-EC2
-
 # Trigger deployment only on push to main branch
 on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     name: Deploy to EC2 on master branch push
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout the files
         uses: actions/checkout@v2
-
       - name: Deploy to Server 1
         uses: easingthemes/ssh-deploy@main
         env:
@@ -22,7 +18,6 @@ jobs:
           REMOTE_HOST: ${{ secrets.HOST_DNS }}
           REMOTE_USER: ${{ secrets.USERNAME }}
           TARGET: ${{ secrets.TARGET_DIR }}
-
       - name: Executing remote ssh commands using ssh key
         uses: appleboy/ssh-action@master
         with:
@@ -34,6 +29,6 @@ jobs:
             sudo apt-get install -y apache2
             sudo systemctl start apache2
             sudo systemctl enable apache2
-            sudo mv ${{ secrets.TARGET_DIR }}/* /var/www/html/  # <-- This is the corrected line
+            sudo mv ${{ secrets.TARGET_DIR }}/* /var/www/html/ # The fix: uses the correct path
             sudo chmod -R 755 /var/www/html
             sudo chown -R www-data:www-data /var/www/html
