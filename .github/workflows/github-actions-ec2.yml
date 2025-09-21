@@ -34,5 +34,6 @@ jobs:
             sudo apt-get install -y apache2
             sudo systemctl start apache2
             sudo systemctl enable apache2
-            cd home
-            sudo mv * /var/www/html
+            sudo mv ${{ secrets.TARGET_DIR }}/* /var/www/html/ # The fix
+            sudo chmod -R 755 /var/www/html
+            sudo chown -R www-data:www-data /var/www/html
