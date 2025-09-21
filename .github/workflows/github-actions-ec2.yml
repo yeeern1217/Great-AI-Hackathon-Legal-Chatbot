@@ -1,0 +1,49 @@
+name: Push-to-EC2
+# Trigger deployment only on push to main branch
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    name: Build and Deploy to EC2
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the files
+        uses: actions/checkout@v3
+
+      # --- START: New Build Steps ---
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # Or whatever version your project uses
+
+      - name: Install dependencies
+        # Add the --legacy-peer-deps flag
+        run: npm install --legacy-peer-deps
+
+      - name: Build project
+        run: npm run build
+      # --- END: New Build Steps ---
+
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          # IMPORTANT: Change the source directory to your build output
+          SOURCE: "dist/" # <-- This is the crucial change!
+          REMOTE_HOST: ${{ secrets.HOST_DNS }}
+          REMOTE_USER: ${{ secrets.USERNAME }}
+          TARGET: ${{ secrets.TARGET_DIR }}
+
+      - name: Executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo rm -rf /var/www/html/*
+            sudo cp -r ${{ secrets.TARGET_DIR }}/* /var/www/html/
+            sudo chmod -R 755 /var/www/html
+            sudo chown -R www-data:www-data /var/www/html
