@@ -32,7 +32,6 @@ SembangLaw! is a web-based application that provides legal assistance to users. 
 *   Node.js and npm
 *   Python 3.9+ and pip
 *   An AWS account (for transcription services)
-*   A Google AI API key
 
 ### Installation
 
