@@ -45,18 +45,26 @@ export default function RecommendExpert({ prompt }: RecommendExpertProps) {
           {isPending ? (
             <p>Recommending...</p>
           ) : experts.length > 0 ? (
-            experts.map((expert) => (
-              <div key={expert.id} className="flex items-center space-x-4">
-                <Avatar>
-                  <AvatarImage src={expert.imageUrl} alt={expert.name} />
-                  <AvatarFallback>{expert.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-semibold">{expert.name}</p>
-                  <p className="text-sm text-muted-foreground">{expert.specialization}</p>
+            <>
+              {experts.map((expert) => (
+                <div key={expert.id} className="flex items-center space-x-4">
+                  <Avatar>
+                    <AvatarImage src={expert.imageUrl} alt={expert.name} />
+                    <AvatarFallback>{expert.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-semibold">{expert.name}</p>
+                    <p className="text-sm text-muted-foreground">{expert.specialization}</p>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))}
+
+              <Button asChild className="w-full mt-4 bg-blue-500 text-white hover:bg-orange-500">
+                <a href="/legal-experts">
+                  Click to see more details or profiles
+                </a>
+              </Button>
+            </>
           ) : (
             <p>No experts found for this topic.</p>
           )}
