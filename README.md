@@ -44,7 +44,7 @@ SembangLaw! is a web-based application that provides legal assistance to users. 
 
 2.  Environment setup:
     Create a .env file in the root directory and add the following:
-    
+    bash
     AWS_ACCESS_KEY_ID=your_aws_access_key
     AWS_SECRET_ACCESS_KEY=your_aws_secret_key
     AWS_REGION=your_service_region
@@ -53,7 +53,7 @@ SembangLaw! is a web-based application that provides legal assistance to users. 
     MODEL_ARN=your_model_arn
          
 
-3.  Prepare application :
+4.  Prepare application :
     bash
     cd server
     python -m venv venv
@@ -67,12 +67,12 @@ SembangLaw! is a web-based application that provides legal assistance to users. 
     npm install
     
 
-4.  Prepare application :
+5.  Prepare application :
     bash
     npm run dev
     
 
-5.  Open your browser:
+6.  Open your browser:
     Navigate to http://localhost:5173 to use the application.
 
 ## Project Structure
