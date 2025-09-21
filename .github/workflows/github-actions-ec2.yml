@@ -24,15 +24,21 @@ jobs:
         run: npm run build
         # IMPORTANT: After this step, your built site is in the 'dist' folder.
 
-      - name: Deploy to EC2
+      - name: Deploy Frontend to EC2
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.HOST_DNS }}
           REMOTE_USER: ${{ secrets.USERNAME }}
-          # The source directory on the runner, after the build is complete.
           SOURCE: "dist/"
-          # The target directory on the EC2 instance.
           TARGET: "/var/www/html"
-          # This option clears the target directory before copying, ensuring a clean deploy.
           ARGS: "--delete"
+
+      - name: Deploy Backend to EC2
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.HOST_DNS }}
+          REMOTE_USER: ${{ secrets.USERNAME }}
+          SOURCE: "server/"
+          TARGET: "/home/ubuntu/server"
