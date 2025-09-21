@@ -171,7 +171,7 @@ const allRoles = Array.from(new Set(data.map(item => item.analysisResult.keyMetr
 const roleColors = ['#3b82f6', '#eab308', '#22c55e', '#ef4444', '#8884d8'];
 
   return (
-    <div className="container mx-auto p-6 space-y-8 bg-gray-50 min-h-screen">
+    <div className="container mx-auto p-6 space-y-8  min-h-screen">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
         <div>
           <h1 className="text-4xl font-extrabold text-gray-800">Legal Contract Dashboard</h1>

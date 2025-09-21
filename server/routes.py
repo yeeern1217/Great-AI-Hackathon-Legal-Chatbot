@@ -149,7 +149,8 @@ def get_experts():
             "experience": f"{item.get('experience', 0)} years",
             "hourlyRate": item.get("hourlyRate"),
             "gender": item.get("gender"),
-            "location": item.get("location")
+            "location": item.get("location"),
+            "imageUrl": item.get("imageUrl")
         })
 
     return {"experts": experts}

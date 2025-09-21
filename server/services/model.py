@@ -40,7 +40,16 @@ def categorize_prompt(prompt: str):
     ]
 
     try:
-        system_prompt = f"""You are an expert classifier for legal queries related to Malaysian labor law. Your task is to categorize the user's query into one or more of the following specializations. Respond with a JSON array of the matching specialization strings. If no specialization matches, respond with an empty array.
+        system_prompt = f"""You are an expert classifier for legal queries related to Malaysian labor law. Your task is to classify Malaysian labor law queries into *one* of these specializations, based on the Act most relevant: 
+
+1. "Employment & Labor Law" — Employment Act 1955  
+2. "Industrial Relations & Unions" — Industrial Relations Act 1967  
+3. "Employee Provident Fund (EPF)" — EPF Act 1991  
+4. "Social Security & Insurance (SOCSO)" — SOCSO Act 1969  
+5. "Workplace Safety & Health" — OSHA 1994  
+
+Return a *single JSON array* with the matching specialization string, e.g. ["Employment & Labor Law"].  
+If none apply, return an empty array []. No extra text.
 
 Available Specializations:
 {json.dumps(specializations, indent=2)}

@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useTheme } from "next-themes";
 import { Scale, Shield, FileCheck, Sparkles } from 'lucide-react';
 
+
 import Header from "@/components/layout/header";
 import Home from "@/pages/home";
 import ChatAssistant from "@/pages/chat-assistant";
@@ -15,6 +16,9 @@ import NotFound from "@/pages/not-found";
 import LabourContractAnalysis from "@/pages/labour-contract-analysis";
 import Dashboard from "@/pages/dashboard";
 import LegalExperts from "@/pages/legalExperts";
+import Login from "@/pages/login";
+import Signup from "@/pages/signup";
+
 
 function Router() {
   return (
@@ -36,6 +40,17 @@ function Router() {
       </Route>
       <Route path="/legal-experts">
         <LegalExperts />
+      </Route>
+
+      
+      <Route path="/signup">
+        <Signup />
+      </Route>
+
+
+      {/* 👇 New login page */}
+      <Route path="/login">
+        <Login />
       </Route>
 
       {/* ✅ fallback route */}
