@@ -4,7 +4,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import type { Expert } from '@/../../shared/schema';
+import type { Expert } from '@shared/schema';
 
 interface RecommendExpertProps {
   prompt: string;
