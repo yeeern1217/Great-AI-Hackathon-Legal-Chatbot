@@ -10,6 +10,7 @@ from shared.schema import InsertChatSession, InsertChatMessage, Expert
 from server.services.model import generate_legal_advice, analyze_document, analyze_labour_contract, analyze_labour_contract_file
 from server.services.transcribe import transcribe_audio
 from server.services.experts import get_expert_recommendations
+from server.user_statistics import get_all_statistics
 
 router = APIRouter()
 
@@ -152,3 +153,28 @@ def get_experts():
         })
 
     return {"experts": experts}
+
+from server.user_statistics import get_all_statistics
+
+@router.get("/api/dashboard-data")
+def get_dashboard_data():
+    """
+    Fetches and returns a list of employment data from DynamoDB for the dashboard.
+    """
+    data = get_all_statistics()
+    
+    if data is None:
+        raise HTTPException(status_code=500, detail="Error fetching data from DynamoDB")
+
+    # Convert Decimal to float for JSON serialization
+    for item in data:
+        if 'analysisResult' in item and 'keyMetrics' in item['analysisResult']:
+            key_metrics = item['analysisResult']['keyMetrics']
+            if 'salary' in key_metrics:
+                key_metrics['salary'] = float(key_metrics['salary'])
+            if 'workingHours' in key_metrics:
+                key_metrics['workingHours'] = float(key_metrics['workingHours'])
+            if 'annualLeave' in key_metrics:
+                key_metrics['annualLeave'] = float(key_metrics['annualLeave'])
+                
+    return data

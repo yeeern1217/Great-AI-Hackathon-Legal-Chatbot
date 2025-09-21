@@ -13,6 +13,7 @@ import ChatAssistant from "@/pages/chat-assistant";
 import Portals from "@/pages/portals";
 import NotFound from "@/pages/not-found";
 import LabourContractAnalysis from "@/pages/labour-contract-analysis";
+import Dashboard from "@/pages/dashboard";
 import LegalExperts from "@/pages/legalExperts";
 
 function Router() {
@@ -29,6 +30,9 @@ function Router() {
       </Route>
       <Route path="/labour-contract-analysis">
         <LabourContractAnalysis />
+      </Route>
+      <Route path="/dashboard">
+        <Dashboard />
       </Route>
       <Route path="/legal-experts">
         <LegalExperts />
@@ -163,7 +167,7 @@ function App() {
           <MinimalLegalIcons isDark={isDark} />
           
           {/* Main Content */}
-          <div className="relative z-20">
+          <div className="relative z-20 pt-16">
             <Header />
             <Toaster />
             <Router />

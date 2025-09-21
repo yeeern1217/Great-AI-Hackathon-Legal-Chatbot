@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Scale, MessageCircle, ExternalLink, Menu, FileScan, UsersRound } from "lucide-react";
+import { Scale, MessageCircle, ExternalLink, Menu, FileScan, LayoutDashboard, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -9,6 +9,7 @@ export default function Header() {
   const navItems = [
     { path: "/chat-assistant", label: "Chat Assistant", icon: MessageCircle },
     { path: "/labour-contract-analysis", label: "Labour Contract Analysis", icon: FileScan },
+    { path: "/dashboard", label: "Contract Insights", icon: LayoutDashboard },
     { path: "/portals", label: "Gov Portals", icon: ExternalLink },
     { path: "/legal-experts", label: "Legal Experts", icon: UsersRound },
   ];
@@ -43,7 +44,7 @@ export default function Header() {
     <nav className="fixed top-0 left-0 right-0 z-50 w-full">
       <div className="backdrop-blur-xl bg-white/5 dark:bg-black/20 shadow-2xl shadow-black/5 dark:shadow-white/5">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-center justify-between h-16 px-4">
+          <div className="flex items-center justify-between h-16">
             {/* Logo with enlarge animation */}
             <Link href="/">
               <div className="flex items-center space-x-2 group cursor-pointer transform transition-transform duration-200 hover:scale-105" data-testid="logo">
@@ -60,7 +61,9 @@ export default function Header() {
             </Link>
 
             {/* Center Menu */}
-            <NavItems />
+            <div className="hidden md:flex">
+              <NavItems />
+            </div>
 
             {/* Mobile Menu with enlarge animation */}
             <Sheet>
