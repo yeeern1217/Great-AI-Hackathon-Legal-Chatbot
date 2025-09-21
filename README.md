@@ -1,6 +1,6 @@
-# Sembang-Law!
+# SembangLaw!
 
-Sembang-Law! is a web-based application that provides legal assistance to users. It leverages AI to answer legal questions, analyze contracts, and connect users with legal experts.
+SembangLaw! is a web-based application that provides legal assistance to users. It leverages AI to answer legal questions, analyze contracts, and connect users with legal experts.
 
 ## Features
 
