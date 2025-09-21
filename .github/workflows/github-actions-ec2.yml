@@ -29,6 +29,9 @@ jobs:
             sudo apt-get install -y apache2
             sudo systemctl start apache2
             sudo systemctl enable apache2
-            sudo mv ${{ secrets.TARGET_DIR }}/* /var/www/html/ # The fix: uses the correct path
+            # --- Start of Changes ---
+            sudo rm -rf /var/www/html/* # Remove default and old files
+            sudo cp -r ${{ secrets.TARGET_DIR }}/* /var/www/html/ # Use copy instead of move
+            # --- End of Changes ---
             sudo chmod -R 755 /var/www/html
             sudo chown -R www-data:www-data /var/www/html
