@@ -19,7 +19,8 @@ jobs:
           node-version: '18' # Or whatever version your project uses
 
       - name: Install dependencies
-        run: npm install
+        # Add the --legacy-peer-deps flag
+        run: npm install --legacy-peer-deps
 
       - name: Build project
         run: npm run build
