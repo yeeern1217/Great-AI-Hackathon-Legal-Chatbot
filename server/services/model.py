@@ -118,13 +118,24 @@ def generate_legal_advice(prompt: str, document_context: str = None):
             logger.error(f"Translation error: {e}. Using original prompt.")
             query_text = prompt
 
+    system_prompt = (
+        "You are a Malaysian AI legal assistant specializing in employment and labor law. "
+        "Your role is to answer questions from Malaysian citizens about their rights and obligations under employment regulations. "
+        "Use clear and simple sentences. "
+        "If the question is outside this domain, politely decline stating that it is not within your area of knowledge. "
+        "Provide only legal information and explanations, not personal opinions, provide legal references where applicable."
+    )
 
+    full_prompt = f"{system_prompt}\n\nUser Query: {query_text}"
+    if document_context:
+        full_prompt = f"{system_prompt}\n\nDocument Context:\n{document_context}\n\nUser Query:\n{query_text}" 
+        
     # Use Knowledge Base if configured
     if KNOWLEDGE_BASE_ID and MODEL_ARN:
         logger.info("Attempting to retrieve from knowledge base...")
         try:
             response = bedrock_agent_client.retrieve_and_generate(
-                input={"text": query_text},
+                input={"text": full_prompt},
                 retrieveAndGenerateConfiguration={
                     "knowledgeBaseConfiguration": {
                         "knowledgeBaseId": KNOWLEDGE_BASE_ID,
@@ -153,40 +164,6 @@ def generate_legal_advice(prompt: str, document_context: str = None):
         except (ClientError, BotoCoreError) as e:
             logger.error(f"Error with knowledge base retrieval: {e}")
             pass
-
-    # Fallback or default behavior: direct model invocation
-    if not MODEL_ID:
-        raise ValueError("MODEL_ID is not configured.")
-    
-    system_prompt = (
-        "You are a Malaysian AI legal assistant specializing in employment and labor law. "
-        "Your role is to answer questions from Malaysian citizens about their rights and obligations under employment regulations. "
-        "Use clear and simple sentences. "
-        "If the question is outside this domain, politely decline stating that it is not within your area of knowledge. "
-        "Provide only legal information and explanations, not personal opinions, provide legal references where applicable."
-    )
-
-    full_prompt = f"{system_prompt}\n\nUser Query: {query_text}"
-    if document_context:
-        full_prompt = f"{system_prompt}\n\nDocument Context:\n{document_context}\n\nUser Query:\n{query_text}"
-
-    request_payload = {
-        "prompt": full_prompt,
-        "max_gen_len": 512,
-        "temperature": 0.1,
-        "top-p": 0.8,
-        "top-k": 10
-    }
-
-    response = bedrock_client.invoke_model(
-        modelId=MODEL_ID,
-        contentType="application/json",
-        accept="application/json",
-        body=json.dumps(request_payload)
-    )
-
-    response_body = json.loads(response['body'].read().decode('utf-8'))
-    answer = response_body.get("generation", "Sorry, I could not generate a response.")
 
     if detected_lang == "ms":
         answer = GoogleTranslator(source="en", target="ms").translate(answer)

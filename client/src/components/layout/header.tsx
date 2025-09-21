@@ -9,7 +9,7 @@ export default function Header() {
   const navItems = [
     { path: "/chat-assistant", label: "Chat Assistant", icon: MessageCircle },
     { path: "/labour-contract-analysis", label: "Labour Contract Analysis", icon: FileScan },
-    { path: "/portals", label: "Gov Portals", icon: ExternalLink },
+    { path: "/portals", label: "Officials", icon: ExternalLink },
     { path: "/legal-experts", label: "Legal Experts", icon: UsersRound },
   ];
 
