@@ -37,39 +37,44 @@ Sembang-Law! is a web-based application that provides legal assistance to users.
 ### Installation
 
 1.  *Clone the repository:*
-    bash
+    ```bash
     git clone https://github.com/your-username/Ai-LegalAdvisor.git
     cd Ai-LegalAdvisor
+    ```
     
 
 2.  *Environment setup:*
     Create a .env file in the root directory and add the following:
-    
+    ```bash
     AWS_ACCESS_KEY_ID=your_aws_access_key
     AWS_SECRET_ACCESS_KEY=your_aws_secret_key
     AWS_REGION=your_service_region
     MODEL_ID=your_model_id
     KNOWLEDGE_BASE_ID=your_knowledge_base
     MODEL_ARN=your_model_arn
+    ```
     
 
 3.  *Prepare application :*
-    bash
+    ```bash
     cd server
     python -m venv venv
     .\venv\Scripts\Activate.ps1
     pip install -r requirements.txt
     python -m uvicorn main:app --reload --port 8000
+    ```
     
 
     Separate terminal
-    bash
+    ```bash
     npm install
+    ```
     
 
 4.  *Prepare application :*
-    bash
+    ```bash
     npm run dev
+    ```
     
 
 5.  *Open your browser:*
@@ -77,7 +82,7 @@ Sembang-Law! is a web-based application that provides legal assistance to users.
 
 ## Project Structure
 
-
+```bash
 Ai-LegalAdvisor/
 ├── client/           # Frontend React application
 │   ├── src/
@@ -87,3 +92,4 @@ Ai-LegalAdvisor/
 │   └── ...
 ├── shared/           # Shared code between frontend and backend
 └── ...
+```
