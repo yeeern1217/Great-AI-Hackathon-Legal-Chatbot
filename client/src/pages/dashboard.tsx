@@ -4,18 +4,18 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieC
 import { AlertTriangle, DollarSign, FileText, Shield, Briefcase, CalendarDays, Clock, Gauge } from 'lucide-react';
 
 const LegalContractDashboard = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState('All');
   
   // State variables for the new, more varied graphs
-  const [avgSalaryByState, setAvgSalaryByState] = useState([]);
-  const [contractsByRole, setContractsByRole] = useState([]);
-  const [roleMetrics, setRoleMetrics] = useState([]);
+  const [avgSalaryByState, setAvgSalaryByState] = useState<any[]>([]);
+  const [contractsByRole, setContractsByRole] = useState<any[]>([]);
+  const [roleMetrics, setRoleMetrics] = useState<any[]>([]);
 
   // Function to calculate data for the new charts
-  const getContractsByRoleData = (filteredData) => {
+  const getContractsByRoleData = (filteredData: any[]) => {
     const roles = filteredData.reduce((acc, contract) => {
       const role = contract.analysisResult.keyMetrics.jobRole;
       acc[role] = (acc[role] || 0) + 1;
@@ -29,8 +29,8 @@ const LegalContractDashboard = () => {
     }));
   };
 
-const getRoleMetricsData = (filteredData) => {
-    const roles = [...new Set(filteredData.map(item => item.analysisResult.keyMetrics.jobRole))];
+const getRoleMetricsData = (filteredData:any[]) => {
+    const roles = Array.from(new Set(filteredData.map(item => item.analysisResult.keyMetrics.jobRole)));
     const metrics = [
         { subject: 'Salary', fullMark: 20000 },
         { subject: 'Working Hours', fullMark: 60 },
@@ -54,7 +54,7 @@ const getRoleMetricsData = (filteredData) => {
         roleValues[role].count += 1;
     });
 
-    const transformedData = metrics.map(metric => ({ subject: metric.subject }));
+    const transformedData: { [key: string]: any }[] = metrics.map(metric => ({ subject: metric.subject }));
 
     roles.forEach(role => {
         const values = roleValues[role];
@@ -90,10 +90,10 @@ const getRoleMetricsData = (filteredData) => {
       return;
     }
 
-    const states = [...new Set(filteredData.map(item => item.analysisResult.state))];
+    const states = Array.from(new Set(filteredData.map(item => item.analysisResult.state)));
 
     // Calculate average salary by state (Bar Chart)
-    const salaryData = {};
+    const salaryData: { [key: string]: { total: number; count: number } } = {};
     states.forEach(state => salaryData[state] = { total: 0, count: 0 });
     filteredData.forEach(item => {
       const state = item.analysisResult.state;
@@ -133,7 +133,7 @@ const getRoleMetricsData = (filteredData) => {
     }
   };
 
-  const getInsightCard = (title, value, icon, subtitle, trend) => (
+  const getInsightCard = (title: string, value: string, icon: React.ReactNode, subtitle: string, trend: string) => (
     <Card key={title}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
@@ -159,7 +159,7 @@ const getRoleMetricsData = (filteredData) => {
   
   const complianceData = filteredContracts.map(contract => {
     const flaggedClauses = contract.analysisResult.flaggedClauses || [];
-    const highRiskClauses = flaggedClauses.filter(clause => clause.riskCategory === 'High').length;
+    const highRiskClauses = flaggedClauses.filter((clause: any) => clause.riskCategory === 'High').length;
     return { complianceScore: Math.max(0, 100 - (highRiskClauses * 25)) };
   });
 
@@ -167,7 +167,7 @@ const getRoleMetricsData = (filteredData) => {
     ? (complianceData.reduce((sum, item) => sum + item.complianceScore, 0) / complianceData.length).toFixed(1)
     : 0;
   
-const allRoles = [...new Set(data.map(item => item.analysisResult.keyMetrics.jobRole))];
+const allRoles = Array.from(new Set(data.map(item => item.analysisResult.keyMetrics.jobRole)));
 const roleColors = ['#3b82f6', '#eab308', '#22c55e', '#ef4444', '#8884d8'];
 
   return (
